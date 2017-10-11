@@ -3,9 +3,10 @@
 
 class Preprocess {
 public:
-
+	Preprocess();
+	~Preprocess();
 private:
-
+	
 };
 
 
