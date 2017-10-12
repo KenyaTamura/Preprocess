@@ -9,6 +9,7 @@ Data::Data(const char* fname) {
 	ifstream ifs(fname);
 	if (ifs.fail()) {
 		cerr << "Not found file" << endl;
+		return;
 	}
 	else {
 		cout << "Loading " << fname << endl;
@@ -32,5 +33,6 @@ char Data::operator[](int i) const {
 	}
 	else {
 		cerr << "Out of range" << endl;
+		return -1;
 	}
 }
