@@ -24,7 +24,7 @@ Data::Data(const char* fname) {
 }
 
 Data::~Data() {
-	delete[] mData;
+//	delete[] mData;
 }
 
 char Data::operator[](int i) const {
