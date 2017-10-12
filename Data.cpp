@@ -6,7 +6,7 @@
 using namespace std;
 
 Data::Data(const char* fname) {
-	ifstream ifs(fname);
+	ifstream ifs(fname, ios::binary);
 	if (ifs.fail()) {
 		cerr << "Not found file" << endl;
 		return;
