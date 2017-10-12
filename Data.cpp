@@ -36,3 +36,7 @@ char Data::operator[](int i) const {
 		return -1;
 	}
 }
+
+int Data::size() const {
+	return mSize;
+}

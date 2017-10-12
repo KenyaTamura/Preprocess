@@ -6,6 +6,7 @@ public:
 	Data(const char* fname);
 	~Data();
 	char operator[](int n) const;
+	int size() const;
 private:
 	int mSize;
 	char* mData;
