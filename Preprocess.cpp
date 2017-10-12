@@ -3,14 +3,16 @@
 #include<algorithm>
 #include<iostream>
 
+#include"Timer.h"
+
 using namespace std;
 
 Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : mRange{ nullptr }, mBlock{ 0 } {
 	if (txt.size() < ptn.size()) {
-		cout << "#####Reverse txt and ptn#####" << endl;
+		cout << "Reverse txt and ptn" << endl;
 		return;
 	}
-	cout << "--Preprocess process start--" << endl;
+	cout << "Preprocess process start" << endl;
 	// The search range of origin
 	list<int> range;
 	// Check the range
@@ -18,10 +20,12 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	// Shape the original range
 	shape(range, ptn.size());
 	cout << "Block = " << mBlock << endl;
+	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
-		//		cout << mRange[i * 2] << '~' << mRange[i * 2 + 1] << ' ';
+		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
 	}
-	cout << "\n--Preprocess process end--" << endl;
+	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
+	cout << "Preprocess process end" << endl;
 }
 
 Preprocess::~Preprocess() {
@@ -35,7 +39,7 @@ int Preprocess::get(int i) const {
 		return mRange[i];
 	}
 	else {
-		cerr << "#####Out of bounds#####\n";
+		cerr << "Out of bounds\n";
 		exit(1);
 	}
 	return -1;
@@ -55,13 +59,16 @@ void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold
 	Hash hashP = get_hash(ptn, ptn.size());
 	// TODO
 	// Optimization comparing times
-	for (int i = 0; i < txt.size() - ptn.size(); ++i) {
+	int size = txt.size() - ptn.size();
+	int psize = ptn.size();
+	for (int i = 0; i < size; ++i) {
 		if (get_score(hashT, hashP) >= threshold) {
 			range.push_back(i);
+			// boolの配列で代用　test/ptnサイズで十分
 		}
 		// Minus i and plus i + ptn.size()
 		minus_hash(hashT, txt[i]);
-		plus_hash(hashT, txt[i + ptn.size()]);
+		plus_hash(hashT, txt[i + psize]);
 	}
 }
 
