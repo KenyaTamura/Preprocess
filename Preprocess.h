@@ -30,7 +30,6 @@ private:
 	inline void minus_hash(Hash& h, char acid) const;
 	// Main process
 	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, range = set result 
-	void get_range(const Data& txt, const Data& ptn, const int threshold, int* range);
 	void get_range(const Data& txt, const Data& ptn, const int threshold, std::list<int>& range);
 	// Get hash
 	Hash get_hash(const Data& data, int length) const;

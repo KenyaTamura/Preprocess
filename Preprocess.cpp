@@ -23,7 +23,7 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += range[i * 2 + 1] - range[i * 2] + 1;
+		newrange += mRange[i * 2 + 1] - range[i * 2] + 1;
 	}
 	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
 	cout << "Preprocess process end" << endl;
