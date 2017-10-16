@@ -37,14 +37,14 @@ void SW::DP(const Data& db, const Data& query) {
 				score = MainScore[p] + 1;
 			}
 			else {
-				score = MainScore[p] - 3;
+				score = MainScore[p] - 1;
 			}
 			// Gap begin
-			FBeg = MainScore[p + 1] - 5;
-			EBeg = prevScore - 5;
+			FBeg = MainScore[p + 1] - 3;
+			EBeg = prevScore - 3;
 			// Gap extend
-			FExt = FScore[p] - 3;
-			EExt = EScore - 3;
+			FExt = FScore[p] - 1;
+			EExt = EScore - 1;
 			// set value
 			MainScore[p] = prevScore;
 			FScore[p] = std::max({ FBeg, FExt, 0 });

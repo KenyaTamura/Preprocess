@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 		SW sw{ *db,*q };
 		if (!ofname.empty()) {
 			Writer w;
-			w.writing_score(ofname.c_str(), sw.score(), db->size(), q->size() / 4);
+			w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
 		}
 	}
 	cout << t.get_millsec() << endl;
