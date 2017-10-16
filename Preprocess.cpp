@@ -14,7 +14,6 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	}
 	cout << "Preprocess process start" << endl;
 	// The search range of origin
-//	int* range = new int[txt.size() / ptn.size()];
 	list<int> range;
 	// Check the range
 	get_range(txt, ptn, threshold, range);
