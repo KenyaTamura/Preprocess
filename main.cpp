@@ -2,6 +2,7 @@
 
 #include"Preprocess.h"
 #include"FileConverter.h"
+#include"SW.h";
 #include"Timer.h"
 
 using namespace std;
@@ -36,7 +37,8 @@ int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
 	if (db != nullptr && q != nullptr) {
-		pre = new Preprocess(*db, *q, threshold);
+//		pre = new Preprocess(*db, *q, threshold);
+		SW sw{ *db,*q };
 	}
 	cout << t.get_millsec() << endl;
 	if (db) {
