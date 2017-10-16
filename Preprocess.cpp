@@ -14,15 +14,16 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	}
 	cout << "Preprocess process start" << endl;
 	// The search range of origin
-	int* range = new int[txt.size() / ptn.size()];
+	mRange = new int[txt.size() / ptn.size()];
+//	list<int> range;
 	// Check the range
-	get_range(txt, ptn, threshold, range);
+	get_range(txt, ptn, threshold);
 	// Shape the original range
-	shape(range, ptn.size());
+//	shape(range, ptn.size());
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += range[i * 2 + 1] - range[i * 2] + 1;
+		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
 	}
 	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
 	cout << "Preprocess process end" << endl;
@@ -53,46 +54,26 @@ int Preprocess::block() const {
 	return mBlock;
 }
 
-void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold, list<int>& range) {
-	// Get hash, the length is ptn size
-	Hash hashT = get_hash(txt, ptn.size());
-	Hash hashP = get_hash(ptn, ptn.size());
-	// TODO
-	// Optimization comparing times
-	int size = txt.size() - ptn.size();
-	int psize = ptn.size();
-	for (int i = 0; i < size; ++i) {
-//		if (get_score(hashT, hashP) >= threshold) {
-			range.push_back(i);
-			// boolの配列で代用　test/ptnサイズで十分
-		}
-		// Minus i and plus i + ptn.size()
-		minus_hash(hashT, txt[i]);
-		plus_hash(hashT, txt[i + psize]);
-	}
-}
 
-void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold, int* range) {
+void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold) {
 	// Get hash, the length is ptn size
 	Hash hashT = get_hash(txt, ptn.size());
 	Hash hashP = get_hash(ptn, ptn.size());
-	// TODO
-	// Optimization comparing times
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int block = 0;
 	for (int i = 0; i < size; ++i) {
 		if (get_score(hashT, hashP) >= threshold) {
 			if (block % 2 == 0) {
-				range[block++] = i;
-				range[block] = i + 1;
+				mRange[block++] = i;
+				mRange[block] = i + 1;
 			}
 			else {
-				range[block] = i;
+				mRange[block] = i;
 			}
 		}
 		else {
-			if (block % 2 != 0 && i - range[block] > psize) {
+			if (block % 2 != 0 && i - mRange[block] > psize) {
 				++block;
 			}
 		}
@@ -123,6 +104,43 @@ int Preprocess::get_score(const Hash& hash1, const Hash& hash2) const {
 	return score;
 }
 
+
+
+void Preprocess::plus_hash(Preprocess::Hash& h, char acid) const {
+	if (acid == 'A') { ++h.ADE; }
+	else if (acid == 'C') { ++h.CYT; }
+	else if (acid == 'G') { ++h.GUA; }
+	else { ++h.TYM; }
+}
+
+void Preprocess::minus_hash(Preprocess::Hash& h, char acid) const {
+	if (acid == 'A') { --h.ADE; }
+	else if (acid == 'C') { --h.CYT; }
+	else if (acid == 'G') { --h.GUA; }
+	else { --h.TYM; }
+}
+
+
+void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold, list<int>& range) {
+	// Get hash, the length is ptn size
+	Hash hashT = get_hash(txt, ptn.size());
+	Hash hashP = get_hash(ptn, ptn.size());
+	// TODO
+	// Optimization comparing times
+	int size = txt.size() - ptn.size();
+	int psize = ptn.size();
+	int k = 0;
+	for (int i = 0; i < size; ++i) {
+		if (get_score(hashT, hashP) >= threshold) {
+			range.push_back(i);
+			// boolの配列で代用　test/ptnサイズで十分
+		}
+		// Minus i and plus i + ptn.size()
+		minus_hash(hashT, txt[i]);
+		plus_hash(hashT, txt[i + psize]);
+	}
+}
+
 void Preprocess::shape(list<int>& origin, const int interval) {
 	// Combine some block
 	list<int>::iterator it = origin.begin();
@@ -151,31 +169,5 @@ void Preprocess::shape(list<int>& origin, const int interval) {
 	for (int i = 0; it != origin.end(); ++it) {
 		mRange[i] = *it;
 		++i;
-	}
-}
-
-void Preprocess::plus_hash(Preprocess::Hash& h, char acid) const {
-	switch (acid) {
-	case 'A':
-		++h.ADE; break;
-	case 'C':
-		++h.CYT; break;
-	case 'G':
-		++h.GUA; break;
-	case 'T':
-		++h.TYM; break;
-	}
-}
-
-void Preprocess::minus_hash(Preprocess::Hash& h, char acid) const {
-	switch (acid) {
-	case 'A':
-		--h.ADE; break;
-	case 'C':
-		--h.CYT; break;
-	case 'G':
-		--h.GUA; break;
-	case 'T':
-		--h.TYM; break;
 	}
 }
