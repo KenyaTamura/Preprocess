@@ -1,12 +1,12 @@
 #include"SW.h"
 #include"Data.h"
+#include"Writer.h"
 
 #include<algorithm>
 #include<iostream>
 
 
 SW::SW(const Data& db, const Data& query) : mScore{ nullptr } {
-	mScore = new int[db.size()]{ 0 };
 	DP(db, query);
 }
 
@@ -17,6 +17,7 @@ SW::~SW() {
 }
 
 void SW::DP(const Data& db, const Data& query) {
+	mScore = new int[db.size()]{ 0 };
 	int tsize = db.size();
 	int psize = query.size();
 	int* FScore = new int[psize] {0};
@@ -58,3 +59,6 @@ void SW::DP(const Data& db, const Data& query) {
 	delete[] MainScore;
 }
 
+int* SW::score() {
+	return mScore;
+}

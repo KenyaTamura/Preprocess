@@ -144,12 +144,14 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Preprocess.cpp" />
     <ClCompile Include="SW.cpp" />
+    <ClCompile Include="Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data.h" />
     <ClInclude Include="FileConverter.h" />
     <ClInclude Include="Preprocess.h" />
     <ClInclude Include="SW.h" />
+    <ClInclude Include="Writer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

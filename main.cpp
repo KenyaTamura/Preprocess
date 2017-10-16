@@ -1,9 +1,11 @@
 #include<iostream>
+#include<string>
 
 #include"Preprocess.h"
 #include"FileConverter.h"
-#include"SW.h";
+#include"SW.h"
 #include"Timer.h"
+#include"Writer.h"
 
 using namespace std;
 
@@ -11,7 +13,8 @@ namespace {
 	Data* db = nullptr;
 	Data* q = nullptr;
 	Preprocess* pre = nullptr;
-	int threshold = 400;
+	int threshold = 0;
+	string ofname;
 }
 
 void arg_branch(int argc, char* argv[]) {
@@ -30,6 +33,9 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-t")) {
 			if (++i < argc) { threshold = atoi(argv[i]); }
 		}
+		if (cmp(i, "-o")) {
+			if (++i < argc) { ofname = argv[i]; }
+		}
 	}
 }
 
@@ -39,6 +45,10 @@ int main(int argc, char* argv[]) {
 	if (db != nullptr && q != nullptr) {
 //		pre = new Preprocess(*db, *q, threshold);
 		SW sw{ *db,*q };
+		if (!ofname.empty()) {
+			Writer w;
+			w.writing_score(ofname.c_str(), sw.score(), db->size(), q->size() / 4);
+		}
 	}
 	cout << t.get_millsec() << endl;
 	if (db) {

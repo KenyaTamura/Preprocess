@@ -7,6 +7,7 @@ class SW {
 public:
 	SW(const Data& db, const Data& query);
 	~SW();
+	int* score();
 private:
 	int* mScore;
 	// Culculate the score by Dynamic Programing 
