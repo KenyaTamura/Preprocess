@@ -19,11 +19,11 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	// Check the range
 	get_range(txt, ptn, threshold, range);
 	// Shape the original range
-	shape(range, ptn.size());
+//	shape(range, ptn.size());
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
+		newrange += range[i * 2 + 1] - range[i * 2] + 1;
 	}
 	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
 	cout << "Preprocess process end" << endl;
@@ -62,9 +62,8 @@ void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold
 	// Optimization comparing times
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
-	int j = 0;
 	for (int i = 0; i < size; ++i) {
-		if (get_score(hashT, hashP) >= threshold) {
+//		if (get_score(hashT, hashP) >= threshold) {
 			range.push_back(i);
 			// boolの配列で代用　test/ptnサイズで十分
 		}
