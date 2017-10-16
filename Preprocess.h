@@ -29,16 +29,12 @@ private:
 	// Hash minus
 	inline void minus_hash(Hash& h, char acid) const;
 	// Main process
-	/// txt = long sequence, ptn = short sequence, threshold = Border of OK
-	void get_range(const Data& txt, const Data& ptn, const int threshold);
+	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, range = set result 
+	void get_range(const Data& txt, const Data& ptn, const int threshold, std::list<int>& range);
 	// Get hash
 	Hash get_hash(const Data& data, int length) const;
 	// Compare hash
-	inline int get_score(const Hash& hash1, const Hash& hash2) const;
-	
-	// Other version 
-	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, range = set result 
-	void get_range(const Data& txt, const Data& ptn, const int threshold, std::list<int>& range);
+	int get_score(const Hash& hash1, const Hash& hash2) const;
 	// Shaping
 	void shape(std::list<int>& origin, const int interval);
 };
