@@ -14,15 +14,15 @@ Preprocess::Preprocess(const Data& txt, const Data& ptn, const int threshold) : 
 	}
 	cout << "Preprocess process start" << endl;
 	// The search range of origin
-	list<int> range;
+	int* range = new int[txt.size() / ptn.size()];
 	// Check the range
 	get_range(txt, ptn, threshold, range);
 	// Shape the original range
-	shape(range, ptn.size());
+//	shape(range, ptn.size());
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
+		newrange += range[i * 2 + 1] - range[i * 2] + 1;
 	}
 	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
 	cout << "Preprocess process end" << endl;
@@ -70,6 +70,40 @@ void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold
 		minus_hash(hashT, txt[i]);
 		plus_hash(hashT, txt[i + psize]);
 	}
+}
+
+void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold, int* range) {
+	// Get hash, the length is ptn size
+	Hash hashT = get_hash(txt, ptn.size());
+	Hash hashP = get_hash(ptn, ptn.size());
+	// TODO
+	// Optimization comparing times
+	int size = txt.size() - ptn.size();
+	int psize = ptn.size();
+	int block = 0;
+	for (int i = 0; i < size; ++i) {
+		if (get_score(hashT, hashP) >= threshold) {
+			if (block % 2 == 0) {
+				range[block++] = i;
+				range[block] = i + 1;
+			}
+			else {
+				range[block] = i;
+			}
+		}
+		else {
+			if (block % 2 != 0 && i - range[block] > psize) {
+				++block;
+			}
+		}
+		// Minus i and plus i + ptn.size()
+		minus_hash(hashT, txt[i]);
+		plus_hash(hashT, txt[i + psize]);
+	}
+	if (block % 2 == 1) {
+		++block;
+	}
+	mBlock = block / 2;
 }
 
 Preprocess::Hash Preprocess::get_hash(const Data& data, int size) const {
