@@ -57,15 +57,12 @@ void Preprocess::get_range(const Data& txt, const Data& ptn, const int threshold
 	// Get hash, the length is ptn size
 	Hash hashT = get_hash(txt, ptn.size());
 	Hash hashP = get_hash(ptn, ptn.size());
-	// TODO
-	// Optimization comparing times
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int j = 0;
 	for (int i = 0; i < size; ++i) {
 		if (get_score(hashT, hashP) >= threshold) {
 			range.push_back(i);
-			// boolの配列で代用　test/ptnサイズで十分
 		}
 		// Minus i and plus i + ptn.size()
 		minus_hash(hashT, txt[i]);
@@ -122,27 +119,15 @@ void Preprocess::shape(list<int>& origin, const int interval) {
 }
 
 void Preprocess::plus_hash(Preprocess::Hash& h, char acid) const {
-	switch (acid) {
-	case 'A':
-		++h.ADE; break;
-	case 'C':
-		++h.CYT; break;
-	case 'G':
-		++h.GUA; break;
-	case 'T':
-		++h.TYM; break;
-	}
+	if (acid == 'A') { ++h.ADE; }
+	else if (acid == 'C') { ++h.CYT; }
+	else if (acid == 'G') { ++h.GUA; }
+	else { ++h.TYM; }
 }
 
 void Preprocess::minus_hash(Preprocess::Hash& h, char acid) const {
-	switch (acid) {
-	case 'A':
-		--h.ADE; break;
-	case 'C':
-		--h.CYT; break;
-	case 'G':
-		--h.GUA; break;
-	case 'T':
-		--h.TYM; break;
-	}
+	if (acid == 'A') { --h.ADE; }
+	else if (acid == 'C') { --h.CYT; }
+	else if (acid == 'G') { --h.GUA; }
+	else { --h.TYM; }
 }
