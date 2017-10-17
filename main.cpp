@@ -12,9 +12,9 @@ using namespace std;
 namespace {
 	Data* db = nullptr;
 	Data* q = nullptr;
-	Preprocess* pre = nullptr;
 	int threshold = 0;
 	string ofname;
+	string ofname_pre;
 }
 
 void arg_branch(int argc, char* argv[]) {
@@ -36,6 +36,9 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-o")) {
 			if (++i < argc) { ofname = argv[i]; }
 		}
+		if (cmp(i, "-predebug")) {
+			if (++i < argc) { ofname_pre = argv[i]; }
+		}
 	}
 }
 
@@ -43,12 +46,16 @@ int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
 	if (db != nullptr && q != nullptr) {
-		pre = new Preprocess(*db, *q, threshold);
-//		SW sw{ *db,*q };
+		if (ofname_pre.empty()) {
+			Preprocess pre(*db, *q, threshold);
+		}
+		else {
+			Preprocess pre(*db, *q, ofname_pre.c_str());
+		}
 		if (!ofname.empty()) {
+			SW sw{ *db,*q };
 			Writer w;
-			//w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
-			w.writing_score(ofname.c_str(), pre->getAll(), pre->block());
+			w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
 		}
 	}
 	cout << t.get_millsec() << endl;
@@ -57,8 +64,5 @@ int main(int argc, char* argv[]) {
 	}
 	if (q) {
 		delete q;
-	}
-	if (pre) {
-		delete pre;
 	}
 }

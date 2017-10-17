@@ -18,7 +18,7 @@ void Writer::writing_score(const char* fname, const int* data, int size) {
 	}
 }
 
-void Writer::writing_score(const char* fname, const int* data, int size, int interval) {
+void Writer::writing_score(const char* fname, const int* data, int size, int interval, int timer) {
 	ofstream ofs(fname, ios::trunc);
 	if (!ofs) { return; }
 	int times = 0;
@@ -28,6 +28,6 @@ void Writer::writing_score(const char* fname, const int* data, int size, int int
 			ofs << '\n';
 			++times;
 		}
-		if (times == 3) { break; }
+		if (times == timer) { break; }
 	}
 }

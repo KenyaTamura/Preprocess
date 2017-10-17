@@ -7,6 +7,7 @@
 class Preprocess {
 public:
 	Preprocess(const Data& txt, const Data& ptn, const int Threshold);
+	Preprocess(const Data& txt, const Data& ptn, const char* fname);	// research score
 	~Preprocess();
 	int get(int i) const;
 	int* getAll() const;
@@ -31,12 +32,15 @@ private:
 	// Main process
 	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, range = set result 
 	void get_range(const Data& txt, const Data& ptn, const int threshold, std::list<int>& range);
+	void get_range(const Data& txt, const Data& ptn, const int threshold);
 	// Get hash
 	Hash get_hash(const Data& data, int length) const;
 	// Compare hash
 	int get_score(const Hash& hash1, const Hash& hash2) const;
 	// Shaping
 	void shape(std::list<int>& origin, const int interval);
+	// Check score
+	void check_score(const Data& txt, const Data& ptn, int* range);
 };
 
 
