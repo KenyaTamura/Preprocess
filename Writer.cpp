@@ -27,7 +27,7 @@ void Writer::writing_score(const char* fname, const int* data, int size, int int
 		if (i % interval == 0 && i != 0) {
 			ofs << '\n';
 			++times;
-			if (times == 3) { break; }
 		}
+		if (times == 3) { break; }
 	}
 }

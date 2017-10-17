@@ -43,11 +43,12 @@ int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
 	if (db != nullptr && q != nullptr) {
-//		pre = new Preprocess(*db, *q, threshold);
-		SW sw{ *db,*q };
+		pre = new Preprocess(*db, *q, threshold);
+//		SW sw{ *db,*q };
 		if (!ofname.empty()) {
 			Writer w;
-			w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
+			//w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
+			w.writing_score(ofname.c_str(), pre->getAll(), pre->block());
 		}
 	}
 	cout << t.get_millsec() << endl;
@@ -56,5 +57,8 @@ int main(int argc, char* argv[]) {
 	}
 	if (q) {
 		delete q;
+	}
+	if (pre) {
+		delete pre;
 	}
 }
