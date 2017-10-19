@@ -7,6 +7,8 @@
 #include"Timer.h"
 #include"Writer.h"
 
+#include"Preprocess_multi.h"
+
 using namespace std;
 
 namespace {
@@ -47,10 +49,12 @@ int main(int argc, char* argv[]) {
 	Timer t;
 	if (db != nullptr && q != nullptr) {
 		if (ofname_pre.empty()) {
-			Preprocess pre(*db, *q, threshold);
+//			Preprocess(*db, *q, threshold);
+			Preprocess_multi(*db, *q, threshold);
 		}
 		else {
-			Preprocess pre(*db, *q, ofname_pre.c_str());
+//			Preprocess(*db, *q, ofname_pre.c_str());
+			Preprocess_multi(*db, *q, ofname_pre.c_str());
 		}
 		if (!ofname.empty()) {
 			SW sw{ *db,*q };
