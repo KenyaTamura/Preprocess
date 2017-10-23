@@ -49,11 +49,15 @@ int main(int argc, char* argv[]) {
 	Timer t;
 	if (db != nullptr && q != nullptr) {
 		if (ofname_pre.empty()) {
-//			Preprocess(*db, *q, threshold);
+			t.start();
+			Preprocess(*db, *q, threshold);
+			cout << t.get_millsec() << endl;
+			t.start();
 			Preprocess_multi(*db, *q, threshold);
+			cout << t.get_millsec() << endl;
 		}
 		else {
-//			Preprocess(*db, *q, ofname_pre.c_str());
+			Preprocess(*db, *q, ofname_pre.c_str());
 			Preprocess_multi(*db, *q, ofname_pre.c_str());
 		}
 		if (!ofname.empty()) {
