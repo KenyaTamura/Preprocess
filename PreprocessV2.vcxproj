@@ -153,6 +153,7 @@
     <ClInclude Include="FileConverter.h" />
     <ClInclude Include="Preprocess.h" />
     <ClInclude Include="PreprocessQuad.h" />
+    <ClInclude Include="PreprocessSW.h" />
     <ClInclude Include="SW.h" />
     <ClInclude Include="Writer.h" />
   </ItemGroup>
