@@ -76,7 +76,7 @@ void Preprocess_multi::check_score(const Data& txt, const Data& ptn, int* range)
 
 void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int threshold) {
 	// Buffer
-	int* buffer = new int[txt.size() / ptn.size()];
+	int* buffer = new int[txt.size()];
 	// Get hash, the length is ptn size
 	char hashT[256]{ 0 };
 	char hashP[256]{ 0 };
@@ -91,13 +91,12 @@ void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int thr
 		else if (acid == 'C') return 1;
 		else if (acid == 'G') return 2;
 		else if (acid == 'T') return 3;
-		else return 0;
 	};
 	auto sum_dec = [&](int i) {
-		return convert(txt[i]) * 64 + convert(txt[i + 1]) * 16 + convert(txt[i + 2]) * 4 + convert(txt[i + 3]);
+		return (convert(txt[i]) << 6) + (convert(txt[i + 1]) << 4) + (convert(txt[i + 2]) << 2) + convert(txt[i + 3]);
 	};
 	auto sum_inc = [&](int i) {
-		return convert(txt[i - 3]) * 64 + convert(txt[i - 2]) * 16 + convert(txt[i - 1]) * 4 + convert(txt[i]);
+		return (convert(txt[i - 3]) << 6) + (convert(txt[i - 2]) << 4) + (convert(txt[i - 1]) << 2) + convert(txt[i]);
 	};
 	for (int i = 0; i < size; ++i) {
 		if (score >= threshold) {
