@@ -1,15 +1,26 @@
-#include"Preprocess_multi.h"
+#include"PreprocessQuad.h"
 #include"Data.h"
 
 #include<iostream>
 #include<algorithm>
 
 #include"Writer.h"
-#include"Timer.h"
 
 using namespace std;
 
-Preprocess_multi::Preprocess_multi(const Data& txt, const Data& ptn, const int threshold) : mRange{ nullptr }, mBlock{ 0 } {
+namespace {
+	constexpr int Quad = 3;
+	constexpr int Type = 256;
+	auto convert = [](char acid) {
+		if (acid == 'A') return 0;
+		else if (acid == 'C') return 1;
+		else if (acid == 'G') return 2;
+		else if (acid == 'T') return 3;
+		else return 0;
+	};
+}
+
+PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const int threshold) : mRange{ nullptr }, mBlock{ 0 } {
 	if (txt.size() < ptn.size()) {
 		cout << "Reverse txt and ptn" << endl;
 		return;
@@ -26,7 +37,7 @@ Preprocess_multi::Preprocess_multi(const Data& txt, const Data& ptn, const int t
 	cout << "Preprocess process end" << endl;
 }
 
-Preprocess_multi::Preprocess_multi(const Data& txt, const Data& ptn, const char* fname) : mRange{ nullptr }, mBlock{ 0 } {
+PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const char* fname) : mRange{ nullptr }, mBlock{ 0 } {
 	if (txt.size() < ptn.size()) {
 		cout << "Reverse txt and ptn" << endl;
 		return;
@@ -42,27 +53,20 @@ Preprocess_multi::Preprocess_multi(const Data& txt, const Data& ptn, const char*
 }
 
 
-Preprocess_multi::~Preprocess_multi() {
+PreprocessQuad::~PreprocessQuad() {
 	if (mRange) {
 		delete[] mRange;
 	}
 }
 
-void Preprocess_multi::check_score(const Data& txt, const Data& ptn, int* range) {
+void PreprocessQuad::check_score(const Data& txt, const Data& ptn, int* range) {
 	// Get hash, the length is ptn size
-	char hashT[256]{ 0 };
-	char hashP[256]{ 0 };
+	char hashT[Type]{ 0 };
+	char hashP[Type]{ 0 };
 	get_hash(txt, ptn.size(), hashT);
 	get_hash(ptn, ptn.size(), hashP);
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
-	auto convert = [](char acid) {
-		if (acid == 'A') return 0;
-		else if (acid == 'C') return 1;
-		else if (acid == 'G') return 2;
-		else if (acid == 'T') return 3;
-		else return 0;
-	};
 	auto sum = [&](int i) {
 		return convert(txt[i]) * 64 + convert(txt[i + 1]) * 16 + convert(txt[i + 2]) * 4 + convert(txt[i + 3]);
 	};
@@ -70,34 +74,22 @@ void Preprocess_multi::check_score(const Data& txt, const Data& ptn, int* range)
 		range[i] = get_score(hashT, hashP);
 		// Minus i and plus i + ptn.size()
 		--hashT[sum(i)];
-		++hashT[sum(i + psize - 3)];
+		++hashT[sum(i + psize - Quad)];
 	}
 }
 
-void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int threshold) {
+void PreprocessQuad::get_range(const Data& txt, const Data& ptn, const int threshold) {
 	// Buffer
-	int* buffer = new int[txt.size()];
+	int* buffer = new int[txt.size() / ptn.size()];
 	// Get hash, the length is ptn size
-	char hashT[256]{ 0 };
-	char hashP[256]{ 0 };
+	char hashT[Type]{ 0 };
+	char hashP[Type]{ 0 };
 	get_hash(txt, ptn.size(), hashT);
 	get_hash(ptn, ptn.size(), hashP);
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int block = 0;
 	int score = get_score(hashT, hashP);
-	auto convert = [](char acid) {
-		if (acid == 'A') return 0;
-		else if (acid == 'C') return 1;
-		else if (acid == 'G') return 2;
-		else if (acid == 'T') return 3;
-	};
-	auto sum_dec = [&](int i) {
-		return (convert(txt[i]) << 6) + (convert(txt[i + 1]) << 4) + (convert(txt[i + 2]) << 2) + convert(txt[i + 3]);
-	};
-	auto sum_inc = [&](int i) {
-		return (convert(txt[i - 3]) << 6) + (convert(txt[i - 2]) << 4) + (convert(txt[i - 1]) << 2) + convert(txt[i]);
-	};
 	for (int i = 0; i < size; ++i) {
 		if (score >= threshold) {
 			if (block % 2 == 0) {
@@ -114,8 +106,9 @@ void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int thr
 			}
 		}
 		// Minus hash i~i+3 and plus hash i + ptn.size()-3 ~ i+ptn.size()
-		int dec = sum_dec(i);
-		int inc = sum_inc(i + psize);
+		int dec = (convert(txt[i]) << 6) + (convert(txt[i + 1]) << 4) + (convert(txt[i + 2]) << 2) + convert(txt[i + 3]);
+		int offset = i + psize;
+		int inc = (convert(txt[offset - 3]) << 6) + (convert(txt[offset - 2]) << 4) + (convert(txt[offset - 1]) << 2) + convert(txt[offset]);
 		if (hashT[dec] <= hashP[dec]) {
 			--score;
 		}
@@ -136,26 +129,20 @@ void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int thr
 	delete[] buffer;
 }
 
-int Preprocess_multi::get_score(const char* hash1, const char* hash2) const{
+int PreprocessQuad::get_score(const char* hash1, const char* hash2) const{
 	int score = 0;
-	for (int i = 0; i < 256; ++i) {
+	for (int i = 0; i < Type; ++i) {
 		score += min(hash1[i], hash2[i]);
 	}
-	return score + 3;
+	if (score == 0) { return 0; }
+	else { return score + Quad; }
 }
 
-void Preprocess_multi::get_hash(const Data& data, int size, char* hash) const{
-	auto convert = [](char acid) { 
-		if (acid == 'A') return 0;
-		else if (acid == 'C') return 1;
-		else if (acid == 'G') return 2;
-		else if (acid == 'T') return 3;
-		else return 0;
-	};
-	auto sum = [&](int i) {
-		return convert(data[i]) * 64 + convert(data[i + 1]) * 16 + convert(data[i + 2]) * 4 + convert(data[i + 3]);
-	};
-	for (int i = 0; i < size - 3; i++) {
-		++hash[sum(i)];
+void PreprocessQuad::get_hash(const Data& data, int size, char* hash) const{
+	for (int i = 0; i < size - Quad; ++i) {
+		++hash[convert(data[i]) * 64 + convert(data[i + 1]) * 16 + convert(data[i + 2]) * 4 + convert(data[i + 3])];
 	}
+	/*for (int i = 0; i < Type; ++i) {
+		cout << static_cast<int>(hash[i]) << endl;
+	}*/
 }

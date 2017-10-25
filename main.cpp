@@ -7,7 +7,7 @@
 #include"Timer.h"
 #include"Writer.h"
 
-#include"Preprocess_multi.h"
+#include"PreprocessQuad.h"
 
 using namespace std;
 
@@ -53,12 +53,12 @@ int main(int argc, char* argv[]) {
 			Preprocess(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
-			Preprocess_multi(*db, *q, threshold);
+			PreprocessQuad(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
 		}
 		else {
 			Preprocess(*db, *q, ofname_pre.c_str());
-			Preprocess_multi(*db, *q, ofname_pre.c_str());
+			PreprocessQuad(*db, *q, ofname_pre.c_str());
 		}
 		if (!ofname.empty()) {
 			SW sw{ *db,*q };

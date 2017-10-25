@@ -1,13 +1,13 @@
-#ifndef PREPROCESS_MULTI_H
-#define PREPROCESS_MULTI_H
+#ifndef PREPROCESSQUAD_H
+#define PREPROCESSQUAD_H
 
 class Data;
 
-class Preprocess_multi{
+class PreprocessQuad{
 public:
-	Preprocess_multi(const Data& txt, const Data& ptn, const int threshold);
-	Preprocess_multi(const Data& txt, const Data& ptn, const char* fname);	// research score
-	~Preprocess_multi();
+	PreprocessQuad(const Data& txt, const Data& ptn, const int threshold);
+	PreprocessQuad(const Data& txt, const Data& ptn, const char* fname);	// research score
+	~PreprocessQuad();
 private:
 	// 0,13,25,50 = 0~13 and 25~50
 	int* mRange;
@@ -23,7 +23,5 @@ private:
 	// Check score
 	void check_score(const Data& txt, const Data& ptn, int* range);
 };
-
-
 
 #endif

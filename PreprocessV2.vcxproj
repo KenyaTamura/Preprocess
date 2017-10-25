@@ -143,7 +143,7 @@
     <ClCompile Include="FileConverter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Preprocess.cpp" />
-    <ClCompile Include="Preprocess_multi.cpp" />
+    <ClCompile Include="PreprocessQuad.cpp" />
     <ClCompile Include="SW.cpp" />
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
@@ -152,7 +152,7 @@
     <ClInclude Include="Data.h" />
     <ClInclude Include="FileConverter.h" />
     <ClInclude Include="Preprocess.h" />
-    <ClInclude Include="Preprocess_multi.h" />
+    <ClInclude Include="PreprocessQuad.h" />
     <ClInclude Include="SW.h" />
     <ClInclude Include="Writer.h" />
   </ItemGroup>
