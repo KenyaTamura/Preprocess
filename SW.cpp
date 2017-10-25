@@ -24,6 +24,7 @@ SW::~SW() {
 
 void SW::DP(const Data& db, const Data& query) {
 	mScore = new int[db.size()]{ 0 };
+	mSize = db.size();
 	int tsize = db.size();
 	int psize = query.size();
 	int* FScore = new int[psize] {0};
