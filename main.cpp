@@ -2,12 +2,14 @@
 #include<string>
 
 #include"Preprocess.h"
-#include"FileConverter.h"
+#include"PreprocessQuad.h"
 #include"SW.h"
+#include"PreprocessSW.h"
+#include"FileConverter.h"
 #include"Timer.h"
 #include"Writer.h"
 
-#include"PreprocessQuad.h"
+
 
 using namespace std;
 
@@ -50,11 +52,12 @@ int main(int argc, char* argv[]) {
 	if (db != nullptr && q != nullptr) {
 		if (ofname_pre.empty()) {
 			t.start();
-			Preprocess(*db, *q, threshold);
+			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
-			t.start();
-			PreprocessQuad(*db, *q, threshold);
-			cout << t.get_millsec() << endl;
+//			t.start();
+//			PreprocessQuad quad(*db, *q, threshold);
+//			PreprocessSW(*db, *q, quad, threshold);
+//			cout << t.get_millsec() << endl;
 		}
 		else {
 			Preprocess(*db, *q, ofname_pre.c_str());

@@ -145,6 +145,7 @@
     <ClCompile Include="Preprocess.cpp" />
     <ClCompile Include="PreprocessBase.cpp" />
     <ClCompile Include="PreprocessQuad.cpp" />
+    <ClCompile Include="PreprocessSW.cpp" />
     <ClCompile Include="SW.cpp" />
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>

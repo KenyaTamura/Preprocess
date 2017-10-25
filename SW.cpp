@@ -29,10 +29,10 @@ void SW::DP(const Data& db, const Data& query) {
 	int FExt = 0;
 	int EBeg = 0;
 	int EExt = 0;
-	int match = Cost::Match;
-	int miss = Cost::Miss;
-	int ext = Cost::Extend;
-	int beg = Cost::Begin;
+	int match = cost.Match;
+	int miss = cost.Miss;
+	int ext = cost.Extend;
+	int beg = cost.Begin;
 	for (int t = 0; t < tsize; ++t) {
 		int EScore = 0;
 		int score = 0;
