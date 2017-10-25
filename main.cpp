@@ -54,10 +54,9 @@ int main(int argc, char* argv[]) {
 			t.start();
 			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
-//			t.start();
-//			PreprocessQuad quad(*db, *q, threshold);
-//			PreprocessSW(*db, *q, quad, threshold);
-//			cout << t.get_millsec() << endl;
+			t.start();
+			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
+			cout << t.get_millsec() << endl;
 		}
 		else {
 			Preprocess(*db, *q, ofname_pre.c_str());

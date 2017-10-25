@@ -19,7 +19,7 @@ PreprocessSW::PreprocessSW(const Data& db, const Data& query, const PreprocessBa
 	mScore = new int[db.size()]{ 0 };	// Be able to cut size
 	mSize = db.size();	
 	for (int i = 0; i < pre.block(); ++i) {
-		DP(db, query, pre.get(i * 2), pre.get(i * 2 + 1));
+		DP(db, query, pre.get(i * 2), pre.get(i * 2 + 1) + query.size());
 	}
 	cout << "Max score is " << max_score() << ", max position is " << max_position() << endl;
 	cout << "PreprocessSW end" << endl;
@@ -84,14 +84,14 @@ void PreprocessSW::DP(const Data& db, const Data& query, int start, int end) {
 }
 
 int PreprocessSW::max_score() {
-	if (mMaxScore != -1) {
+	if (mMaxScore == -1) {
 		search_max();
 	}
 	return mMaxScore;
 }
 
 int PreprocessSW::max_position() {
-	if (mMaxScore != -1) {
+	if (mMaxScore == -1) {
 		search_max();
 	}
 	return mMaxPos;
