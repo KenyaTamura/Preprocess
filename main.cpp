@@ -4,8 +4,10 @@
 #include"Data.h"
 #include"Preprocess.h"
 #include"PreprocessQuad.h"
+#include"PreprocessBase.h"
 #include"SW.h"
 #include"PreprocessSW.h"
+#include"SWBase.h"
 #include"FileConverter.h"
 #include"Timer.h"
 #include"Writer.h"
@@ -18,6 +20,8 @@ namespace {
 	int threshold = 0;
 	string ofname;
 	string ofname_pre;
+	string type = "quad";
+	bool cmp_flag = false;
 }
 
 void arg_branch(int argc, char* argv[]) {
@@ -42,30 +46,54 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-predebug")) {
 			if (++i < argc) { ofname_pre = argv[i]; }
 		}
+		if (cmp(i, "-type")) {
+			if (++i < argc) { type = argv[i]; }
+		}
+		if (cmp(i, "-cmp")) {
+			cmp_flag = true;	++i;
+		}
 	}
 }
 
 int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
+	auto type_check = [&](const char* str) -> bool {return (strcmp(type.c_str(), str) == 0); };
 	Timer t;
 	if (db != nullptr && q != nullptr) {
-		if (ofname_pre.empty()) {
+		// Compare execution time
+		if (cmp_flag) {
 			t.start();
-			SW sw{ *db,*q,threshold };
-//			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
+			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
 			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
+			t.start();
+			SW(*db, *q, threshold);
+			cout << t.get_millsec() << endl;
 		}
+		else if (!ofname_pre.empty()) {
+			if (type_check("single")) { Preprocess(*db, *q, ofname_pre.c_str()); }
+			else if (type_check("quad")) { PreprocessQuad(*db, *q, ofname_pre.c_str()); }
+		}
+		// All of result at preprocess
 		else {
-			Preprocess(*db, *q, ofname_pre.c_str());
-			PreprocessQuad(*db, *q, ofname_pre.c_str());
-		}
-		if (!ofname.empty()) {
-			SW sw{ *db,*q,threshold };
-			Writer w;
-			w.writing_score(ofname.c_str(), sw.all_score(), db->size(), db->size() / 100);
+			if (type_check("simple")) { 
+				SW sw(*db, *q, threshold);
+				// All of result
+				if (!ofname.empty()) {
+					Writer w;
+					w.writing_score(ofname.c_str(), sw.all_score(), db->size(), db->size() / 100);
+				}
+			}
+			else {
+				if (type_check("single")) {
+					PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
+				}
+				else {
+					PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
+				}
+			}
 		}
 	}
 	cout << t.get_millsec() << endl;
