@@ -22,8 +22,6 @@ private:
 	int get_score(const char* hash1, const char* hash2) const;
 	// Check score
 	void check_score(const Data& txt, const Data& ptn, int* range);
-	// Length of hash array
-	int hash_len;
 };
 
 

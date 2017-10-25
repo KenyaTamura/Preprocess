@@ -5,6 +5,7 @@
 #include<algorithm>
 
 #include"Writer.h"
+#include"Timer.h"
 
 using namespace std;
 
@@ -14,7 +15,6 @@ Preprocess_multi::Preprocess_multi(const Data& txt, const Data& ptn, const int t
 		return;
 	}
 	cout << "Preprocess process start" << endl;
-	mRange = new int[txt.size() / ptn.size()];
 	// Check the range
 	get_range(txt, ptn, threshold);
 	cout << "Block = " << mBlock << endl;
@@ -75,6 +75,8 @@ void Preprocess_multi::check_score(const Data& txt, const Data& ptn, int* range)
 }
 
 void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int threshold) {
+	// Buffer
+	int* buffer = new int[txt.size()];
 	// Get hash, the length is ptn size
 	char hashT[256]{ 0 };
 	char hashP[256]{ 0 };
@@ -83,39 +85,55 @@ void Preprocess_multi::get_range(const Data& txt, const Data& ptn, const int thr
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int block = 0;
+	int score = get_score(hashT, hashP);
 	auto convert = [](char acid) {
 		if (acid == 'A') return 0;
 		else if (acid == 'C') return 1;
 		else if (acid == 'G') return 2;
 		else if (acid == 'T') return 3;
-		else return 0;
 	};
-	auto sum = [&](int i) {
-		return convert(txt[i]) * 64 + convert(txt[i + 1]) * 16 + convert(txt[i + 2]) * 4 + convert(txt[i + 3]);
+	auto sum_dec = [&](int i) {
+		return (convert(txt[i]) << 6) + (convert(txt[i + 1]) << 4) + (convert(txt[i + 2]) << 2) + convert(txt[i + 3]);
+	};
+	auto sum_inc = [&](int i) {
+		return (convert(txt[i - 3]) << 6) + (convert(txt[i - 2]) << 4) + (convert(txt[i - 1]) << 2) + convert(txt[i]);
 	};
 	for (int i = 0; i < size; ++i) {
-		if (get_score(hashT, hashP) >= threshold) {
+		if (score >= threshold) {
 			if (block % 2 == 0) {
-				mRange[block++] = i;
-				mRange[block] = i + 1;
+				buffer[block++] = i;
+				buffer[block] = i + 1;
 			}
 			else {
-				mRange[block] = i;
+				buffer[block] = i;
 			}
 		}
 		else {
-			if (block % 2 != 0 && i - mRange[block] > psize) {
+			if (block % 2 != 0 && i - buffer[block] > psize) {
 				++block;
 			}
 		}
-		// Minus i and plus i + ptn.size()
-		--hashT[sum(i)];
-		++hashT[sum(i + psize - 3)];
+		// Minus hash i~i+3 and plus hash i + ptn.size()-3 ~ i+ptn.size()
+		int dec = sum_dec(i);
+		int inc = sum_inc(i + psize);
+		if (hashT[dec] <= hashP[dec]) {
+			--score;
+		}
+		--hashT[dec];
+		if (hashT[inc] < hashP[inc]) {
+			++score;
+		}
+		++hashT[inc];
 	}
 	if (block % 2 == 1) {
 		++block;
 	}
 	mBlock = block / 2;
+	mRange = new int[block];
+	for (int i = 0; i < block; ++i) {
+		mRange[i] = buffer[i];
+	}
+	delete[] buffer;
 }
 
 int Preprocess_multi::get_score(const char* hash1, const char* hash2) const{
