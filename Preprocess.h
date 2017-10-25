@@ -1,23 +1,16 @@
 #ifndef KASE_H
 #define KASE_H
 
-#include"Data.h"
-#include<list>
+#include"PreprocessBase.h"
 
-class Preprocess {
+class Data;
+
+class Preprocess : public PreprocessBase{
 public:
-	Preprocess(const Data& txt, const Data& ptn, const int Threshold);
+	Preprocess(const Data& txt, const Data& ptn, const int threshold);
 	Preprocess(const Data& txt, const Data& ptn, const char* fname);	// research score
 	~Preprocess();
-	int get(int i) const;
-	int* getAll() const;
-	int block() const;
 private:
-	// 0,13,25,50 = 0~13 and 25~50
-	int* mRange;
-	// The number of range blocks
-	int mBlock;
-
 	// The number of each acid
 	struct Hash {
 		int ADE = 0;
@@ -30,15 +23,12 @@ private:
 	// Hash minus
 	inline void minus_hash(Hash& h, char acid) const;
 	// Main process
-	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, range = set result 
-	void get_range(const Data& txt, const Data& ptn, const int threshold, std::list<int>& range);
+	/// txt = long sequence, ptn = short sequence, threshold = Border of OK
 	void get_range(const Data& txt, const Data& ptn, const int threshold);
 	// Get hash
 	Hash get_hash(const Data& data, int length) const;
 	// Compare hash
 	int get_score(const Hash& hash1, const Hash& hash2) const;
-	// Shaping
-	void shape(std::list<int>& origin, const int interval);
 	// Check score
 	void check_score(const Data& txt, const Data& ptn, int* range);
 };

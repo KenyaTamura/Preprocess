@@ -20,12 +20,12 @@ namespace {
 	};
 }
 
-PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const int threshold) : mRange{ nullptr }, mBlock{ 0 } {
+PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const int threshold) {
 	if (txt.size() < ptn.size()) {
 		cout << "Reverse txt and ptn" << endl;
 		return;
 	}
-	cout << "Preprocess process start" << endl;
+	cout << "PreprocessQuad start" << endl;
 	// Check the range
 	get_range(txt, ptn, threshold);
 	cout << "Block = " << mBlock << endl;
@@ -34,24 +34,23 @@ PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const int thres
 		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
 	}
 	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
-	cout << "Preprocess process end" << endl;
+	cout << "PreprocessQuad end" << endl;
 }
 
-PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const char* fname) : mRange{ nullptr }, mBlock{ 0 } {
+PreprocessQuad::PreprocessQuad(const Data& txt, const Data& ptn, const char* fname) {
 	if (txt.size() < ptn.size()) {
 		cout << "Reverse txt and ptn" << endl;
 		return;
 	}
-	cout << "Preprocess process start" << endl;
+	cout << "PreprocessQuad start" << endl;
 	// The search range of origin
 	int* score = new int[txt.size() - ptn.size()];
 	// Check the range
 	check_score(txt, ptn, score);
 	Writer w;
 	w.writing_score(fname, score, txt.size() - ptn.size(), txt.size() / 100, 100);
-	cout << "Preprocess process end" << endl;
+	cout << "PreprocessQuad end" << endl;
 }
-
 
 PreprocessQuad::~PreprocessQuad() {
 	if (mRange) {

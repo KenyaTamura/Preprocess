@@ -10,7 +10,7 @@ public:
 	PreprocessSW(const Data& db, const Data& query, const Preprocess& pre, int threshold);
 	~PreprocessSW();
 private:
-	void DP(const Data& db, const Data& query, );
+	void DP(const Data& db, const Data& query);
 };
 
 
