@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 
+#include"Data.h"
 #include"Preprocess.h"
 #include"PreprocessQuad.h"
 #include"SW.h"
@@ -8,8 +9,6 @@
 #include"FileConverter.h"
 #include"Timer.h"
 #include"Writer.h"
-
-
 
 using namespace std;
 
@@ -52,7 +51,8 @@ int main(int argc, char* argv[]) {
 	if (db != nullptr && q != nullptr) {
 		if (ofname_pre.empty()) {
 			t.start();
-			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
+			SW sw{ *db,*q,threshold };
+//			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
 			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
@@ -63,9 +63,9 @@ int main(int argc, char* argv[]) {
 			PreprocessQuad(*db, *q, ofname_pre.c_str());
 		}
 		if (!ofname.empty()) {
-			SW sw{ *db,*q };
+			SW sw{ *db,*q,threshold };
 			Writer w;
-			w.writing_score(ofname.c_str(), sw.score(), db->size(), db->size() / 100);
+			w.writing_score(ofname.c_str(), sw.all_score(), db->size(), db->size() / 100);
 		}
 	}
 	cout << t.get_millsec() << endl;

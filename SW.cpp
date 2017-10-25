@@ -6,9 +6,14 @@
 #include<algorithm>
 #include<iostream>
 
+using namespace std;
 
-SW::SW(const Data& db, const Data& query) : mScore{ nullptr } {
+SW::SW(const Data& db, const Data& query, int threshold) : SWBase{ threshold } {
+	cout << "SW start" << endl;
 	DP(db, query);
+	cout << "Max score is " << max_score() << ", max position is " << max_position() << endl;
+	cout << "SW end" << endl;
+	
 }
 
 SW::~SW() {
@@ -58,9 +63,9 @@ void SW::DP(const Data& db, const Data& query) {
 			EExt = EScore + ext;
 			// set value
 			MainScore[p] = prevScore;
-			FScore[p] = std::max({ FBeg, FExt, 0 });
-			EScore = std::max({ EBeg, EExt, 0 });
-			prevScore = std::max({ FScore[p],EScore,score });
+			FScore[p] = max({ FBeg, FExt, 0 });
+			EScore = max({ EBeg, EExt, 0 });
+			prevScore = max({ FScore[p],EScore,score });
 			if (mScore[t] < prevScore) {
 				mScore[t] = prevScore;
 			}
@@ -68,8 +73,4 @@ void SW::DP(const Data& db, const Data& query) {
 	}
 	delete[] FScore;
 	delete[] MainScore;
-}
-
-int* SW::score() {
-	return mScore;
 }

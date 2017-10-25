@@ -1,25 +1,18 @@
 #ifndef PREPROCESSSW_H
 #define PREPROCESSSW_H
 
+#include"SWBase.h"
 class PreprocessBase;
 class Data;
 
-class PreprocessSW {
+class PreprocessSW : public SWBase{
 public:
 	PreprocessSW(const Data& db, const Data& query, const PreprocessBase& pre, int threshold);
 	~PreprocessSW();
-	int max_score();
-	int max_position();
-	int* all_score();
 private:
 	PreprocessSW() {};
+	// Culculate the score by Dynamic Programing 
 	void DP(const Data& db, const Data& query, int start, int end);
-	int* mScore;
-	int mSize;
-	int mThreshold;
-	int mMaxPos;
-	int mMaxScore;
-	void search_max();
 };
 
 

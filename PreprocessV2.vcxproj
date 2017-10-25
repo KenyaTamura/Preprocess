@@ -147,6 +147,7 @@
     <ClCompile Include="PreprocessQuad.cpp" />
     <ClCompile Include="PreprocessSW.cpp" />
     <ClCompile Include="SW.cpp" />
+    <ClCompile Include="SWBase.cpp" />
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="PreprocessQuad.h" />
     <ClInclude Include="PreprocessSW.h" />
     <ClInclude Include="SW.h" />
+    <ClInclude Include="SWBase.h" />
     <ClInclude Include="Writer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

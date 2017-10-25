@@ -8,13 +8,7 @@
 
 using namespace std;
 
-PreprocessSW::PreprocessSW(const Data& db, const Data& query, const PreprocessBase& pre, int threshold) :
-	mScore{ nullptr }, 
-	mThreshold{ threshold },
-	mSize{ 0 },
-	mMaxScore{ -1 },
-	mMaxPos{ -1 }
-{
+PreprocessSW::PreprocessSW(const Data& db, const Data& query, const PreprocessBase& pre, int threshold) : SWBase{ threshold } {
 	cout << "PreprocessSW start" << endl;
 	mScore = new int[db.size()]{ 0 };	// Be able to cut size
 	mSize = db.size();	
@@ -28,6 +22,7 @@ PreprocessSW::PreprocessSW(const Data& db, const Data& query, const PreprocessBa
 PreprocessSW::~PreprocessSW() {
 	if (mScore) {
 		delete[] mScore;
+		mScore = nullptr;
 	}
 }
 
@@ -83,33 +78,4 @@ void PreprocessSW::DP(const Data& db, const Data& query, int start, int end) {
 	delete[] MainScore;
 }
 
-int PreprocessSW::max_score() {
-	if (mMaxScore == -1) {
-		search_max();
-	}
-	return mMaxScore;
-}
 
-int PreprocessSW::max_position() {
-	if (mMaxScore == -1) {
-		search_max();
-	}
-	return mMaxPos;
-}
-
-void PreprocessSW::search_max() {
-	for (int i = 0; i < mSize; ++i) {
-		if (mScore[i] >= mThreshold && mScore[i] > mMaxScore) {
-			mMaxScore = mScore[i];
-			mMaxPos = i;
-		}
-	}
-	if (mMaxScore == -1) {
-		mMaxScore = 0;
-		mMaxPos = 0;
-	}
-}
-
-int* PreprocessSW::all_score() {
-	return mScore;
-}
