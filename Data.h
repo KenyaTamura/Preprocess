@@ -8,6 +8,7 @@ public:
 	char operator[](int n) const;
 	int size() const;
 private:
+	Data();
 	int mSize;
 	char* mData;
 };
