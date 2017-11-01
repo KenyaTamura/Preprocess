@@ -1,15 +1,12 @@
 #include<iostream>
 #include<string>
-#include<string.h>
 
 #include"Data.h"
-//#include"PreprocessSingle.h"
+#include"Preprocess.h"
 #include"PreprocessQuad.h"
 #include"PreprocessBase.h"
-//#include"SimpleSW.h"
-#include"PreprocessSW.h"
 #include"SW.h"
-//#include"PreprocessSWGPU.h"
+#include"PreprocessSW.h"
 #include"SWBase.h"
 #include"FileConverter.h"
 #include"Timer.h"
@@ -25,14 +22,13 @@ namespace {
 	string ofname_pre;
 	string type = "quad";
 	bool cmp_flag = false;
-	bool gpu_flag = true;
 }
 
 void arg_branch(int argc, char* argv[]) {
 	auto cmp = [&](int i, const char* str) -> bool {return (strcmp(argv[i], str) == 0); };
 	for (int i = 1; i < argc; ++i) {
-		if (cmp(i,"-convert")) {
-			if (i + 2 < argc) { FileConverter f(argv[i+1],argv[i+2]); }
+		if (cmp(i, "-convert")) {
+			if (i + 2 < argc) { FileConverter f(argv[i + 1], argv[i + 2]); }
 			i += 2;
 		}
 		if (cmp(i, "-db")) {
@@ -54,10 +50,7 @@ void arg_branch(int argc, char* argv[]) {
 			if (++i < argc) { type = argv[i]; }
 		}
 		if (cmp(i, "-cmp")) {
-			cmp_flag = true;
-		}
-		if (cmp(i, "-cpu")){
-			gpu_flag = false;
+			cmp_flag = true;	++i;
 		}
 	}
 }
@@ -66,45 +59,36 @@ int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	auto type_check = [&](const char* str) -> bool {return (strcmp(type.c_str(), str) == 0); };
 	Timer t;
-	if (db != nullptr && q != nullptr && db->data() != nullptr && q->data() != nullptr) {
+	if (db != nullptr && q != nullptr) {
 		// Compare execution time
 		if (cmp_flag) {
 			t.start();
-			PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
+			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
 			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
-			SimpleSW(*db, *q, threshold);
+			SW(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
 		}
 		else if (!ofname_pre.empty()) {
-			if (type_check("single")) { PreprocessSingle(*db, *q, ofname_pre.c_str()); }
+			if (type_check("single")) { Preprocess(*db, *q, ofname_pre.c_str()); }
 			else if (type_check("quad")) { PreprocessQuad(*db, *q, ofname_pre.c_str()); }
 		}
 		// All of result at preprocess
 		else {
-			if (type_check("simple")) { 
-				SimpleSW sw(*db, *q, threshold);
+			if (type_check("simple")) {
+				SW sw(*db, *q, threshold);
 				// All of result
 				if (!ofname.empty()) {
 					Writer w;
 					w.writing_score(ofname.c_str(), sw.all_score(), db->size(), db->size() / 100);
 				}
 			}
-			else if(gpu_flag){
-				if (type_check("single")) {
-					PreprocessSWGPU(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
-				}
-				else {
-					PreprocessSWGPU(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
-				}
-
-			}
 			else {
 				if (type_check("single")) {
-					PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
+					PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
 				}
 				else {
 					PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
