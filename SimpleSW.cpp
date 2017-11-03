@@ -1,4 +1,4 @@
-#include"SW.h"
+#include"SimpleSW.h"
 #include"Data.h"
 #include"Writer.h"
 #include"Cost.h"
@@ -8,21 +8,21 @@
 
 using namespace std;
 
-SW::SW(const Data& db, const Data& query, int threshold) : SWBase{ threshold } {
-	cout << "SW start" << endl;
+SimpleSW::SimpleSW(const Data& db, const Data& query, int threshold) : SWBase{ threshold } {
+	cout << "SimpleSW start" << endl;
 	DP(db, query);
 	cout << "Max score is " << max_score() << ", max position is " << max_position() << endl;
-	cout << "SW end" << endl;
+	cout << "SimpleSW end" << endl;
 	
 }
 
-SW::~SW() {
+SimpleSW::~SimpleSW() {
 	if (mScore) {
 		delete[] mScore;
 	}
 }
 
-void SW::DP(const Data& db, const Data& query) {
+void SimpleSW::DP(const Data& db, const Data& query) {
 	mScore = new int[db.size()]{ 0 };
 	mSize = db.size();
 	int tsize = db.size();

@@ -142,11 +142,11 @@
     <ClCompile Include="Data.cpp" />
     <ClCompile Include="FileConverter.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Preprocess.cpp" />
+    <ClCompile Include="PreprocessSingle.cpp" />
     <ClCompile Include="PreprocessBase.cpp" />
     <ClCompile Include="PreprocessQuad.cpp" />
     <ClCompile Include="PreprocessSW.cpp" />
-    <ClCompile Include="SW.cpp" />
+    <ClCompile Include="SimpleSW.cpp" />
     <ClCompile Include="SWBase.cpp" />
     <ClCompile Include="Writer.cpp" />
   </ItemGroup>
@@ -154,11 +154,11 @@
     <ClInclude Include="Cost.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="FileConverter.h" />
-    <ClInclude Include="Preprocess.h" />
+    <ClInclude Include="PreprocessSingle.h" />
     <ClInclude Include="PreprocessBase.h" />
     <ClInclude Include="PreprocessQuad.h" />
     <ClInclude Include="PreprocessSW.h" />
-    <ClInclude Include="SW.h" />
+    <ClInclude Include="SImpleSW.h" />
     <ClInclude Include="SWBase.h" />
     <ClInclude Include="Writer.h" />
   </ItemGroup>

@@ -1,11 +1,12 @@
 #include<iostream>
 #include<string>
+#include<string.h>
 
 #include"Data.h"
-#include"Preprocess.h"
+#include"PreprocessSingle.h"
 #include"PreprocessQuad.h"
 #include"PreprocessBase.h"
-#include"SW.h"
+#include"SimpleSW.h"
 #include"PreprocessSW.h"
 #include"SWBase.h"
 #include"FileConverter.h"
@@ -19,7 +20,6 @@ namespace {
 	Data* q = nullptr;
 	int threshold = 0;
 	string ofname;
-	string ofname_pre;
 	string type = "quad";
 	bool cmp_flag = false;
 }
@@ -40,62 +40,53 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-t")) {
 			if (++i < argc) { threshold = atoi(argv[i]); }
 		}
-		if (cmp(i, "-o")) {
-			if (++i < argc) { ofname = argv[i]; }
-		}
-		if (cmp(i, "-predebug")) {
-			if (++i < argc) { ofname_pre = argv[i]; }
-		}
 		if (cmp(i, "-type")) {
 			if (++i < argc) { type = argv[i]; }
 		}
 		if (cmp(i, "-cmp")) {
-			cmp_flag = true;	++i;
+			cmp_flag = true;
 		}
 	}
 }
 
-int main(int argc, char* argv[]) {
-	arg_branch(argc, argv);
+void mode_select() {
 	auto type_check = [&](const char* str) -> bool {return (strcmp(type.c_str(), str) == 0); };
-	Timer t;
-	if (db != nullptr && q != nullptr) {
+	if (db != nullptr && q != nullptr && db->data() != nullptr && q->data() != nullptr) {
 		// Compare execution time
 		if (cmp_flag) {
-			t.start();
-			PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
+			Timer t;
+			PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
 			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
-			SW(*db, *q, threshold);
+			SimpleSW(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
-		}
-		else if (!ofname_pre.empty()) {
-			if (type_check("single")) { Preprocess(*db, *q, ofname_pre.c_str()); }
-			else if (type_check("quad")) { PreprocessQuad(*db, *q, ofname_pre.c_str()); }
 		}
 		// All of result at preprocess
 		else {
 			if (type_check("simple")) {
-				SW sw(*db, *q, threshold);
-				// All of result
-				if (!ofname.empty()) {
-					Writer w;
-					w.writing_score(ofname.c_str(), sw.all_score(), db->size(), db->size() / 100);
-				}
+				SimpleSW sw(*db, *q, threshold);
+			}
+			else if (type_check("single")) {
+				PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
 			}
 			else {
-				if (type_check("single")) {
-					PreprocessSW(*db, *q, Preprocess(*db, *q, threshold), threshold);
-				}
-				else {
-					PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
-				}
+				PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
 			}
+
 		}
 	}
+	else {
+		cout << "File error" << endl;
+	}
+}
+
+int main(int argc, char* argv[]) {
+	arg_branch(argc, argv);
+	Timer t;
+	mode_select();
 	cout << t.get_millsec() << endl;
 	if (db) {
 		delete db;

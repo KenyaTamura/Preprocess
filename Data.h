@@ -7,7 +7,9 @@ public:
 	~Data();
 	char operator[](int n) const;
 	int size() const;
+	char* data() const;
 private:
+	Data();
 	int mSize;
 	char* mData;
 };

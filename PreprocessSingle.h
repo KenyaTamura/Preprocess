@@ -1,15 +1,15 @@
-#ifndef KASE_H
-#define KASE_H
+#ifndef PREPROCESSSINGLE_H
+#define PREPROCESSSINGLE_H
 
 #include"PreprocessBase.h"
 
 class Data;
 
-class Preprocess : public PreprocessBase{
+class PreprocessSingle : public PreprocessBase{
 public:
-	Preprocess(const Data& txt, const Data& ptn, const int threshold);
-	Preprocess(const Data& txt, const Data& ptn, const char* fname);	// research score
-	~Preprocess();
+	PreprocessSingle(const Data& txt, const Data& ptn, const int threshold);
+	PreprocessSingle(const Data& txt, const Data& ptn, const char* fname);	// research score
+	~PreprocessSingle();
 private:
 	// The number of each acid
 	struct Hash {
