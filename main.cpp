@@ -4,6 +4,8 @@
 
 #include"Data.h"
 #include"PreprocessSingle.h"
+#include"PreprocessDouble.h"
+#include"PreprocessTriple.h"
 #include"PreprocessQuad.h"
 #include"PreprocessBase.h"
 #include"SimpleSW.h"
@@ -52,17 +54,23 @@ void arg_branch(int argc, char* argv[]) {
 void mode_select() {
 	auto type_check = [&](const char* str) -> bool {return (strcmp(type.c_str(), str) == 0); };
 	if (db != nullptr && q != nullptr && db->data() != nullptr && q->data() != nullptr) {
-		// Compare execution time
+		// Compare execution time at preprocess
 		if (cmp_flag) {
 			Timer t;
-			PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
+			PreprocessSingle(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
-			PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
+			PreprocessDouble(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
 			t.start();
-			SimpleSW(*db, *q, threshold);
+			PreprocessTriple(*db, *q, threshold);
 			cout << t.get_millsec() << endl;
+			t.start();
+			PreprocessQuad(*db, *q, threshold);
+			cout << t.get_millsec() << endl;
+	//		t.start();
+	//		SimpleSW(*db, *q, threshold);
+	//		cout << t.get_millsec() << endl;
 		}
 		// All of result at preprocess
 		else {
@@ -71,6 +79,12 @@ void mode_select() {
 			}
 			else if (type_check("single")) {
 				PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
+			}
+			else if (type_check("double")) {
+				PreprocessSW(*db, *q, PreprocessDouble(*db, *q, threshold), threshold);
+			}
+			else if (type_check("triple")) {
+				PreprocessSW(*db, *q, PreprocessTriple(*db, *q, threshold), threshold);
 			}
 			else {
 				PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
