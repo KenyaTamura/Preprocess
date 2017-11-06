@@ -48,6 +48,9 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-cmp")) {
 			cmp_flag = true;
 		}
+		if (cmp(i, "-o")) {
+			if (++i < argc) { ofname = argv[i]; }
+		}
 	}
 }
 
@@ -102,6 +105,10 @@ int main(int argc, char* argv[]) {
 	Timer t;
 	mode_select();
 	cout << t.get_millsec() << endl;
+	if (!ofname.empty()) {
+		Writer w;
+		w.writing_time(ofname.c_str(), t.get_millsec());
+	}
 	if (db) {
 		delete db;
 	}
