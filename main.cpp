@@ -24,6 +24,7 @@ namespace {
 	string ofname;
 	string type = "quad";
 	bool cmp_flag = false;
+	bool sw_flag = false;
 }
 
 void arg_branch(int argc, char* argv[]) {
@@ -51,6 +52,9 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-o")) {
 			if (++i < argc) { ofname = argv[i]; }
 		}
+		if (cmp(i, "-sw")) {
+			sw_flag = true;
+		}
 	}
 }
 
@@ -75,24 +79,29 @@ void mode_select() {
 	//		SimpleSW(*db, *q, threshold);
 	//		cout << t.get_millsec() << endl;
 		}
-		// All of result at preprocess
+		// Preprocess
 		else {
 			if (type_check("simple")) {
 				SimpleSW sw(*db, *q, threshold);
+				return;
 			}
-			else if (type_check("single")) {
-				PreprocessSW(*db, *q, PreprocessSingle(*db, *q, threshold), threshold);
+			PreprocessBase* pre = nullptr;
+			if (type_check("single")) {
+				pre = new PreprocessSingle(*db, *q, threshold);
 			}
 			else if (type_check("double")) {
-				PreprocessSW(*db, *q, PreprocessDouble(*db, *q, threshold), threshold);
+				pre = new PreprocessDouble(*db, *q, threshold);
 			}
 			else if (type_check("triple")) {
-				PreprocessSW(*db, *q, PreprocessTriple(*db, *q, threshold), threshold);
+				pre = new PreprocessTriple(*db, *q, threshold);
 			}
 			else {
-				PreprocessSW(*db, *q, PreprocessQuad(*db, *q, threshold), threshold);
+				pre = new PreprocessQuad(*db, *q, threshold);
 			}
-
+			if (sw_flag) {
+				PreprocessSW(*db, *q, *pre, threshold);
+			}
+			delete pre;
 		}
 	}
 	else {
