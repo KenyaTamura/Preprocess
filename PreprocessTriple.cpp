@@ -45,8 +45,8 @@ PreprocessTriple::~PreprocessTriple() {
 
 void PreprocessTriple::check_score(const Data& txt, const Data& ptn, int* range) {
 	// Get hash, the length is ptn size
-	char hashT[Type]{ 0 };
-	char hashP[Type]{ 0 };
+	int hashT[Type]{ 0 };
+	int hashP[Type]{ 0 };
 	get_hash(txt, ptn.size(), hashT);
 	get_hash(ptn, ptn.size(), hashP);
 	int size = txt.size() - ptn.size();
@@ -66,8 +66,8 @@ void PreprocessTriple::get_range(const Data& txt, const Data& ptn, const int thr
 	// Buffer
 	int* buffer = new int[txt.size() / ptn.size()];
 	// Get hash, the length is ptn size
-	char hashT[Type]{ 0 };
-	char hashP[Type]{ 0 };
+	int hashT[Type]{ 0 };
+	int hashP[Type]{ 0 };
 	get_hash(txt, ptn.size(), hashT);
 	get_hash(ptn, ptn.size(), hashP);
 	int size = txt.size() - ptn.size();
@@ -113,7 +113,7 @@ void PreprocessTriple::get_range(const Data& txt, const Data& ptn, const int thr
 	delete[] buffer;
 }
 
-int PreprocessTriple::get_score(const char* hash1, const char* hash2) const {
+int PreprocessTriple::get_score(const int* hash1, const int* hash2) const {
 	int score = 0;
 	for (int i = 0; i < Type; ++i) {
 		score += min(hash1[i], hash2[i]);
@@ -122,7 +122,7 @@ int PreprocessTriple::get_score(const char* hash1, const char* hash2) const {
 	else { return score + Triple; }
 }
 
-void PreprocessTriple::get_hash(const Data& data, int size, char* hash) const {
+void PreprocessTriple::get_hash(const Data& data, int size, int* hash) const {
 	for (int i = 0; i < size - Triple; ++i) {
 		++hash[convert(data[i]) * 16 + convert(data[i + 1]) * 4 + convert(data[i + 2])];
 	}
