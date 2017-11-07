@@ -21,20 +21,7 @@ namespace {
 }
 
 PreprocessTriple::PreprocessTriple(const Data& txt, const Data& ptn, const int threshold) {
-	if (txt.size() < ptn.size()) {
-		cout << "Reverse txt and ptn" << endl;
-		return;
-	}
-	cout << "PreprocessTriple start" << endl;
-	// Check the range
-	get_range(txt, ptn, threshold);
-	cout << "Block = " << mBlock << endl;
-	int newrange = ptn.size();
-	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
-	}
-	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
-	cout << "PreprocessTriple end" << endl;
+	process(txt, ptn, threshold, "Triple");
 }
 
 PreprocessTriple::~PreprocessTriple() {
@@ -52,7 +39,7 @@ void PreprocessTriple::check_score(const Data& txt, const Data& ptn, int* range)
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	auto sum = [&](int i) {
-		return convert(txt[i]) * 16 + convert(txt[i + 1]) * 4 + convert(txt[i + 2]);
+		return (convert(txt[i]) << 4) + (convert(txt[i + 1]) << 2) + convert(txt[i + 2]);
 	};
 	for (int i = 0; i < size; ++i) {
 		range[i] = get_score(hashT, hashP);
@@ -124,7 +111,7 @@ int PreprocessTriple::get_score(const int* hash1, const int* hash2) const {
 
 void PreprocessTriple::get_hash(const Data& data, int size, int* hash) const {
 	for (int i = 0; i < size - Triple; ++i) {
-		++hash[convert(data[i]) * 16 + convert(data[i + 1]) * 4 + convert(data[i + 2])];
+		++hash[(convert(data[i]) << 4) + (convert(data[i + 1]) << 2) + convert(data[i + 2])];
 	}
 	/*for (int i = 0; i < Type; ++i) {
 	cout << static_cast<int>(hash[i]) << endl;

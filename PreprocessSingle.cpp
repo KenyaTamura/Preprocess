@@ -9,20 +9,7 @@
 using namespace std;
 
 PreprocessSingle::PreprocessSingle(const Data& txt, const Data& ptn, const int threshold) {
-	if (txt.size() < ptn.size()) {
-		cout << "Reverse txt and ptn" << endl;
-		return;
-	}
-	cout << "PreprocessSingle start" << endl;
-	// Check the range
-	get_range(txt, ptn, threshold);
-	cout << "Block = " << mBlock << endl;
-	int newrange = ptn.size();
-	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
-	}
-	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
-	cout << "PreprocessSingle end" << endl;
+	process(txt, ptn, threshold, "Single");
 }
 
 PreprocessSingle::PreprocessSingle(const Data& txt, const Data& ptn, const char* fname) {
