@@ -8,6 +8,17 @@
 
 using namespace std;
 
+namespace {
+	constexpr int Type = 4;
+	auto convert = [](char acid) {
+		if (acid == 'A') return 0;
+		else if (acid == 'C') return 1;
+		else if (acid == 'G') return 2;
+		else if (acid == 'T') return 3;
+		else return 0;
+	};
+}
+
 PreprocessSingle::PreprocessSingle(const Data& txt, const Data& ptn, const int threshold) {
 	process(txt, ptn, threshold, "Single");
 }
@@ -33,17 +44,39 @@ PreprocessSingle::~PreprocessSingle() {
 	}
 }
 
+void PreprocessSingle::check_score(const Data& txt, const Data& ptn, int* range) {
+	// Get hash, the length is ptn size
+	int hashT[Type]{ 0 };
+	int hashP[Type]{ 0 };
+	get_hash(txt, ptn.size(), hashT);
+	get_hash(ptn, ptn.size(), hashP);
+	int size = txt.size() - ptn.size();
+	int psize = ptn.size();
+	auto sum = [&](int i) {
+		return convert(txt[i]);
+	};
+	for (int i = 0; i < size; ++i) {
+		range[i] = get_score(hashT, hashP);
+		// Minus i and plus i + ptn.size()
+		--hashT[sum(i)];
+		++hashT[sum(i + psize)];
+	}
+}
+
 void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int threshold) {
 	// Buffer
 	int* buffer = new int[txt.size() / ptn.size()];
 	// Get hash, the length is ptn size
-	Hash hashT = get_hash(txt, ptn.size());
-	Hash hashP = get_hash(ptn, ptn.size());
+	int hashT[Type]{ 0 };
+	int hashP[Type]{ 0 };
+	get_hash(txt, ptn.size(), hashT);
+	get_hash(ptn, ptn.size(), hashP);
 	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int block = 0;
+	int score = get_score(hashT, hashP);
 	for (int i = 0; i < size; ++i) {
-		if (get_score(hashT, hashP) >= threshold) {
+		if (score >= threshold) {
 			if (block % 2 == 0) {
 				buffer[block++] = i;
 				buffer[block] = i + 1;
@@ -57,9 +90,17 @@ void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int thr
 				++block;
 			}
 		}
-		// Minus i and plus i + ptn.size()
-		minus_hash(hashT, txt[i]);
-		plus_hash(hashT, txt[i + psize]);
+		// Minus hash i~i+1 and plus hash i + ptn.size()-1 ~ i+ptn.size()
+		int dec = convert(txt[i]);
+		int inc = convert(txt[i + psize]);
+		if (hashT[dec] <= hashP[dec]) {
+			--score;
+		}
+		--hashT[dec];
+		if (hashT[inc] < hashP[inc]) {
+			++score;
+		}
+		++hashT[inc];
 	}
 	if (block % 2 == 1) {
 		++block;
@@ -72,48 +113,18 @@ void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int thr
 	delete[] buffer;
 }
 
-void PreprocessSingle::check_score(const Data& txt, const Data& ptn, int* score) {
-	// Get hash, the length is ptn size
-	Hash hashT = get_hash(txt, ptn.size());
-	Hash hashP = get_hash(ptn, ptn.size());
-	int size = txt.size() - ptn.size();
-	int psize = ptn.size();
-	int j = 0;
+void PreprocessSingle::get_hash(const Data& data, int size, int* hash) const {
 	for (int i = 0; i < size; ++i) {
-		score[i] = get_score(hashT, hashP);
-		// Minus i and plus i + ptn.size()
-		minus_hash(hashT, txt[i]);
-		plus_hash(hashT, txt[i + psize]);
+		++hash[convert(data[i])];
 	}
 }
 
-PreprocessSingle::Hash PreprocessSingle::get_hash(const Data& data, int size) const {
-	Hash h;
-	for (int i = 0; i < size; ++i) {
-		plus_hash(h, data[i]);
-	}
-	return h;
-}
-
-int PreprocessSingle::get_score(const Hash& hash1, const Hash& hash2) const {
+int PreprocessSingle::get_score(const int* hash1, const int* hash2) const {
 	int score = 0;
-	score += std::min(hash1.ADE, hash2.ADE);
-	score += std::min(hash1.CYT, hash2.CYT);
-	score += std::min(hash1.GUA, hash2.GUA);
-	score += std::min(hash1.TYM, hash2.TYM);
-	return score;
+	for (int i = 0; i < Type; ++i) {
+		score += min(hash1[i], hash2[i]);
+	}
+	if (score == 0) { return 0; }
+	else { return score; }
 }
 
-void PreprocessSingle::plus_hash(PreprocessSingle::Hash& h, char acid) const {
-	if (acid == 'A') { ++h.ADE; }
-	else if (acid == 'C') { ++h.CYT; }
-	else if (acid == 'G') { ++h.GUA; }
-	else { ++h.TYM; }
-}
-
-void PreprocessSingle::minus_hash(PreprocessSingle::Hash& h, char acid) const {
-	if (acid == 'A') { --h.ADE; }
-	else if (acid == 'C') { --h.CYT; }
-	else if (acid == 'G') { --h.GUA; }
-	else { --h.TYM; }
-}
