@@ -17,7 +17,8 @@ void PreprocessBase::process(const Data& txt, const Data& ptn, const int thresho
 	for (int i = 0; i < mBlock; ++i) {
 		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
 	}
-	cout << "New length is " << 100 * (double)(newrange) / (double)(txt.size()) << "%" << endl;
+	mPercent = 100 * (double)(newrange) / (double)(txt.size());
+	cout << "New length is " << mPercent << "%" << endl;
 	cout << "Preprocess" << id << " end" << endl;
 }
 
@@ -38,4 +39,8 @@ int* PreprocessBase::getAll() const {
 
 int PreprocessBase::block() const {
 	return mBlock;
+}
+
+double PreprocessBase::get_percent() const {
+	return mPercent;
 }

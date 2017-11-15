@@ -32,8 +32,14 @@ void Writer::writing_score(const char* fname, const int* data, int size, int int
 	}
 }
 
-void Writer::writing_time(const char* fname, int time) {
+void Writer::writing(const char* fname, int i) {
 	ofstream ofs(fname, ios::out | ios::app);
 	if (!ofs) { return; }
-	ofs << time << ",";
+	ofs << i << ",";
+}
+
+void Writer::writing(const char* fname, double d) {
+	ofstream ofs(fname, ios::out | ios::app);
+	if (!ofs) { return; }
+	ofs << d << ",";
 }

@@ -25,6 +25,8 @@ namespace {
 	string type = "quad";
 	bool cmp_flag = false;
 	bool sw_flag = false;
+	bool percent_flag = false;
+	PreprocessBase* pre = nullptr;
 }
 
 void arg_branch(int argc, char* argv[]) {
@@ -51,6 +53,9 @@ void arg_branch(int argc, char* argv[]) {
 		}
 		if (cmp(i, "-o")) {
 			if (++i < argc) { ofname = argv[i]; }
+		}
+		if (cmp(i, "-percent")) {
+			if (++i < argc) { ofname = argv[i]; percent_flag = true; }
 		}
 		if (cmp(i, "-sw")) {
 			sw_flag = true;
@@ -84,8 +89,7 @@ void mode_select() {
 			if (type_check("simple")) {
 				SimpleSW sw(*db, *q, threshold);
 				return;
-			}
-			PreprocessBase* pre = nullptr;
+			}		
 			if (type_check("single")) {
 				pre = new PreprocessSingle(*db, *q, threshold);
 			}
@@ -101,7 +105,6 @@ void mode_select() {
 			if (sw_flag) {
 				PreprocessSW(*db, *q, *pre, threshold);
 			}
-			delete pre;
 		}
 	}
 	else {
@@ -116,12 +119,20 @@ int main(int argc, char* argv[]) {
 	cout << t.get_millsec() << endl;
 	if (!ofname.empty()) {
 		Writer w;
-		w.writing_time(ofname.c_str(), t.get_millsec());
+		if (percent_flag) {
+			w.writing(ofname.c_str(), pre->get_percent());
+		}
+		else {
+			w.writing(ofname.c_str(), t.get_millsec());
+		}
 	}
 	if (db) {
 		delete db;
 	}
 	if (q) {
 		delete q;
+	}
+	if (pre) {
+		delete pre;
 	}
 }
