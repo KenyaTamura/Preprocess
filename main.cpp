@@ -15,9 +15,9 @@
 #include"Timer.h"
 #include"Writer.h"
 
-using namespace std;
+#include"PreprocessParallel.h"
 
-#include<thread>
+using namespace std;
 
 namespace {
 	Data* db = nullptr;
@@ -116,7 +116,8 @@ void mode_select() {
 int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
-	PreprocessSingle pres{ *db, *q, threshold };
+	PreprocessParallel{ *db, *q, threshold };
+//	PreprocessSingle{ *db, *q, threshold };
 	cout << t.get_millsec() << endl;
 	/*
 	mode_select();

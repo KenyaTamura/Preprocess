@@ -21,7 +21,7 @@ protected:
 	// First call
 	void process(const Data& txt, const Data& ptn, const int threshold, const char* id);
 	// Main process
-	virtual void get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end) {};
+	virtual void get_range(const Data& txt, const Data& ptn, const int threshold) {};
 };
 
 

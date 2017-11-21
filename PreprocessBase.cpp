@@ -1,6 +1,7 @@
 #include"PreprocessBase.h"
 #include"Data.h"
 #include<iostream>
+#include<thread>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ void PreprocessBase::process(const Data& txt, const Data& ptn, const int thresho
 	}
 	cout << "Preprocess" << id << " start" << endl;
 	// Check the range
-	get_range(txt, ptn, threshold, 2000000, txt.size()/2);
+	get_range(txt, ptn, threshold);
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {
@@ -20,6 +21,7 @@ void PreprocessBase::process(const Data& txt, const Data& ptn, const int thresho
 	mPercent = 100 * (double)(newrange) / (double)(txt.size());
 	cout << "New length is " << mPercent << "%" << endl;
 	cout << "Preprocess" << id << " end" << endl;
+
 }
 
 int PreprocessBase::get(int i) const {

@@ -29,19 +29,20 @@ PreprocessSingle::~PreprocessSingle() {
 	}
 }
 
-void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end) {
+void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int threshold) {
+	// Get hash, the length is ptn size
+	// Buffer
+	int* buffer = new int[txt.size() / ptn.size()];
 	// Get hash, the length is ptn size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
-	get_hash(txt, ptn.size(), hashT, start);
-	get_hash(ptn, ptn.size(), hashP, 0);
-	int size = end - start - ptn.size() + 1;
+	get_hash(txt, ptn.size(), hashT);
+	get_hash(ptn, ptn.size(), hashP);
+	int size = txt.size() - ptn.size();
 	int psize = ptn.size();
 	int block = 0;
 	int score = get_score(hashT, hashP);
-	// Buffer
-	int* buffer = new int[size / psize];
-	for (int i = start; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 		if (score >= threshold) {
 			if (block % 2 == 0) {
 				buffer[block++] = i;
@@ -79,9 +80,9 @@ void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int thr
 	delete[] buffer;
 }
 
-void PreprocessSingle::get_hash(const Data& data, int size, int* hash, int start) const {
+void PreprocessSingle::get_hash(const Data& data, int size, int* hash) const {
 	for (int i = 0; i < size; ++i) {
-		++hash[convert(data[i + start])];
+		++hash[convert(data[i])];
 	}
 }
 
