@@ -11,7 +11,7 @@ void PreprocessBase::process(const Data& txt, const Data& ptn, const int thresho
 	}
 	cout << "Preprocess" << id << " start" << endl;
 	// Check the range
-	get_range(txt, ptn, threshold);
+	get_range(txt, ptn, threshold, 2000000, txt.size()/2);
 	cout << "Block = " << mBlock << endl;
 	int newrange = ptn.size();
 	for (int i = 0; i < mBlock; ++i) {

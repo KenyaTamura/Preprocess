@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#include<thread>
+
 namespace {
 	Data* db = nullptr;
 	Data* q = nullptr;
@@ -111,10 +113,12 @@ void mode_select() {
 		cout << "File error" << endl;
 	}
 }
-
 int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
+	PreprocessSingle pres{ *db, *q, threshold };
+	cout << t.get_millsec() << endl;
+	/*
 	mode_select();
 	cout << t.get_millsec() << endl;
 	if (!ofname.empty()) {
@@ -125,7 +129,7 @@ int main(int argc, char* argv[]) {
 		else {
 			w.writing(ofname.c_str(), t.get_millsec());
 		}
-	}
+	}*/
 	if (db) {
 		delete db;
 	}
