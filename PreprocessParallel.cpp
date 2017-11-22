@@ -21,48 +21,8 @@ namespace {
 	};
 }
 
-PreprocessParallel::PreprocessParallel(const Data& txt, const Data& ptn, const int threshold) : mRange{ nullptr }, mBlock{ 0 } {
-	if (txt.size() < ptn.size()) {
-		cout << "Reverse txt and ptn" << endl;
-		return;
-	}
-	cout << "Preprocess Parallel start" << endl;
-	thread thr[4];
-	int blocks[4];
-	int buffer[4][10000];
-	int start = 0;
-	for (int i = 0; i < 4; ++i) {
-		int end = start + txt.size() / 4 + ptn.size();
-		if (i == 3) {
-			end = txt.size();
-		}
-		thr[i] = thread{ &PreprocessParallel::get_range, this, 
-			ref(txt), ref(ptn), threshold, 
-			start, end,
-			ref(blocks[i]), ref(buffer[i])
-		};
-		start += txt.size() / 4;
-	}
-	for (int i = 0; i < 4; ++i) {
-		thr[i].join();
-		mBlock += blocks[i] / 2;
-	}
-	cout << "Block = " << mBlock << endl;
-	mRange = new int[mBlock * 2];
-	int count = 0;
-	for (int i = 0; i < 4; ++i) {
-		for (int j = 0; j < blocks[i]; j++) {
-			mRange[count++] = buffer[i][j];
-		}
-	}
-	int newrange = 0;
-	// Check the range
-	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1 + ptn.size();
-	}
-	mPercent = 100 * (double)(newrange) / (double)(txt.size());
-	cout << "New length is " << mPercent << "%" << endl;
-	cout << "Preprocess Parallel end" << endl;
+PreprocessParallel::PreprocessParallel(const Data& db, const Data& query, const int threshold){
+	start(db, query, threshold, "Parallel");
 }
 
 PreprocessParallel::~PreprocessParallel() {
@@ -71,39 +31,44 @@ PreprocessParallel::~PreprocessParallel() {
 	}
 }
 
-
-int PreprocessParallel::get(int i) const {
-	if (i < mBlock * 2) {
-		return mRange[i];
+void PreprocessParallel::process(const Data& db, const Data& query, const int threshold) {
+	thread thr[4];
+	int blocks[4];
+	int buffer[4][10000];
+	int start = 0;
+	for (int i = 0; i < 4; ++i) {
+		int end = start + db.size() / 4 + query.size();
+		if (i == 3) {
+			end = db.size();
+		}
+		thr[i] = thread{ &PreprocessParallel::get_range, this,
+			ref(db), ref(query), threshold,
+			start, end,
+			ref(blocks[i]), ref(buffer[i])
+		};
+		start += db.size() / 4;
 	}
-	else {
-		std::cerr << "Out of bounds\n";
-		exit(1);
+	for (int i = 0; i < 4; ++i) {
+		thr[i].join();
+		mBlock += blocks[i] / 2;
 	}
-	return -1;
+	mRange = new int[mBlock * 2];
+	int count = 0;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < blocks[i]; j++) {
+			mRange[count++] = buffer[i][j];
+		}
+	}
 }
 
-int* PreprocessParallel::getAll() const {
-	return mRange;
-}
-
-int PreprocessParallel::block() const {
-	return mBlock;
-}
-
-double PreprocessParallel::get_percent() const {
-	return mPercent;
-}
-
-
-void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end, int& block, int* buffer) {
-	// Get hash, the length is ptn size
+void PreprocessParallel::get_range(const Data& db, const Data& query, const int threshold, int start, int end, int& block, int* buffer) {
+	// Get hash, the length is query size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
-	get_hash(txt, ptn.size(), hashT, start);
-	get_hash(ptn, ptn.size(), hashP, 0);
-	int size = end - start - ptn.size() + 1;
-	int psize = ptn.size();
+	get_hash(db, query.size(), hashT, start);
+	get_hash(query, query.size(), hashP, 0);
+	int size = end - start - query.size() + 1;
+	int psize = query.size();
 	block = 0;
 	int score = get_score(hashT, hashP);
 	size += start;
@@ -122,9 +87,9 @@ void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int t
 				++block;
 			}
 		}
-		// Minus hash i~i+1 and plus hash i + ptn.size()-1 ~ i+ptn.size()
-		int dec = convert(txt[i]);
-		int inc = convert(txt[i + psize]);
+		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
+		int dec = convert(db[i]);
+		int inc = convert(db[i + psize]);
 		if (hashT[dec] <= hashP[dec]) {
 			--score;
 		}

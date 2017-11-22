@@ -19,8 +19,8 @@ namespace {
 	};
 }
 
-PreprocessSingle::PreprocessSingle(const Data& txt, const Data& ptn, const int threshold) {
-	process(txt, ptn, threshold, "Single");
+PreprocessSingle::PreprocessSingle(const Data& db, const Data& query, const int threshold) {
+	start(db, query, threshold, "Single");
 }
 
 PreprocessSingle::~PreprocessSingle() {
@@ -29,17 +29,21 @@ PreprocessSingle::~PreprocessSingle() {
 	}
 }
 
-void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int threshold) {
-	// Get hash, the length is ptn size
+void PreprocessSingle::process(const Data& db, const Data& query, const int threshold) {
+	get_range(db, query, threshold);
+}
+
+void PreprocessSingle::get_range(const Data& db, const Data& query, const int threshold) {
+	// Get hash, the length is query size
 	// Buffer
-	int* buffer = new int[txt.size() / ptn.size()];
-	// Get hash, the length is ptn size
+	int* buffer = new int[db.size() / query.size()];
+	// Get hash, the length is query size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
-	get_hash(txt, ptn.size(), hashT);
-	get_hash(ptn, ptn.size(), hashP);
-	int size = txt.size() - ptn.size();
-	int psize = ptn.size();
+	get_hash(db, query.size(), hashT);
+	get_hash(query, query.size(), hashP);
+	int size = db.size() - query.size();
+	int psize = query.size();
 	int block = 0;
 	int score = get_score(hashT, hashP);
 	for (int i = 0; i < size; ++i) {
@@ -57,9 +61,9 @@ void PreprocessSingle::get_range(const Data& txt, const Data& ptn, const int thr
 				++block;
 			}
 		}
-		// Minus hash i~i+1 and plus hash i + ptn.size()-1 ~ i+ptn.size()
-		int dec = convert(txt[i]);
-		int inc = convert(txt[i + psize]);
+		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
+		int dec = convert(db[i]);
+		int inc = convert(db[i + psize]);
 		if (hashT[dec] <= hashP[dec]) {
 			--score;
 		}

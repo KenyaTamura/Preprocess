@@ -20,8 +20,8 @@ namespace {
 	};
 }
 
-PreprocessTriple::PreprocessTriple(const Data& txt, const Data& ptn, const int threshold) {
-	process(txt, ptn, threshold, "Triple");
+PreprocessTriple::PreprocessTriple(const Data& db, const Data& query, const int threshold) {
+	start(db, query, threshold, "Triple");
 }
 
 PreprocessTriple::~PreprocessTriple() {
@@ -30,35 +30,35 @@ PreprocessTriple::~PreprocessTriple() {
 	}
 }
 
-void PreprocessTriple::check_score(const Data& txt, const Data& ptn, int* range) {
-	// Get hash, the length is ptn size
+void PreprocessTriple::check_score(const Data& db, const Data& query, int* range) {
+	// Get hash, the length is query size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
-	get_hash(txt, ptn.size(), hashT);
-	get_hash(ptn, ptn.size(), hashP);
-	int size = txt.size() - ptn.size();
-	int psize = ptn.size();
+	get_hash(db, query.size(), hashT);
+	get_hash(query, query.size(), hashP);
+	int size = db.size() - query.size();
+	int psize = query.size();
 	auto sum = [&](int i) {
-		return (convert(txt[i]) << 4) + (convert(txt[i + 1]) << 2) + convert(txt[i + 2]);
+		return (convert(db[i]) << 4) + (convert(db[i + 1]) << 2) + convert(db[i + 2]);
 	};
 	for (int i = 0; i < size; ++i) {
 		range[i] = get_score(hashT, hashP);
-		// Minus i and plus i + ptn.size()
+		// Minus i and plus i + query.size()
 		--hashT[sum(i)];
 		++hashT[sum(i + psize - Triple)];
 	}
 }
 
-void PreprocessTriple::get_range(const Data& txt, const Data& ptn, const int threshold) {
+void PreprocessTriple::get_range(const Data& db, const Data& query, const int threshold) {
 	// Buffer
-	int* buffer = new int[txt.size() / ptn.size()];
-	// Get hash, the length is ptn size
+	int* buffer = new int[db.size() / query.size()];
+	// Get hash, the length is query size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
-	get_hash(txt, ptn.size(), hashT);
-	get_hash(ptn, ptn.size(), hashP);
-	int size = txt.size() - ptn.size();
-	int psize = ptn.size();
+	get_hash(db, query.size(), hashT);
+	get_hash(query, query.size(), hashP);
+	int size = db.size() - query.size();
+	int psize = query.size();
 	int block = 0;
 	int score = get_score(hashT, hashP);
 	for (int i = 0; i < size; ++i) {
@@ -76,10 +76,10 @@ void PreprocessTriple::get_range(const Data& txt, const Data& ptn, const int thr
 				++block;
 			}
 		}
-		// Minus hash i~i+1 and plus hash i + ptn.size()-1 ~ i+ptn.size()
-		int dec = (convert(txt[i]) << 4) + (convert(txt[i + 1]) << 2) + convert(txt[i + 2]);
+		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
+		int dec = (convert(db[i]) << 4) + (convert(db[i + 1]) << 2) + convert(db[i + 2]);
 		int offset = i + psize;
-		int inc = (convert(txt[offset - 2]) << 4) + (convert(txt[offset - 1]) << 2) + convert(txt[offset]);
+		int inc = (convert(db[offset - 2]) << 4) + (convert(db[offset - 1]) << 2) + convert(db[offset]);
 		if (hashT[dec] <= hashP[dec]) {
 			--score;
 		}
