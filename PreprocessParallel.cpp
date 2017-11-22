@@ -27,16 +27,38 @@ PreprocessParallel::PreprocessParallel(const Data& txt, const Data& ptn, const i
 		return;
 	}
 	cout << "Preprocess Parallel start" << endl;
-	// Check the range
-	thread thread1{ &PreprocessParallel::get_range, this, ref(txt), ref(ptn), threshold, (txt.size() / 2) + 1, txt.size() -1};
-	thread thread2{ &PreprocessParallel::get_range, this, ref(txt), ref(ptn), threshold, 0, (txt.size() / 2) };
-	thread1.join();
-	thread2.join();
+	thread thr[4];
+	int blocks[4];
+	int buffer[4][10000];
+	int start = 0;
+	for (int i = 0; i < 4; ++i) {
+		int end = start + txt.size() / 4 + ptn.size();
+		if (i == 3) {
+			end = txt.size();
+		}
+		thr[i] = thread{ &PreprocessParallel::get_range, this, 
+			ref(txt), ref(ptn), threshold, 
+			start, end,
+			ref(blocks[i]), ref(buffer[i])
+		};
+		start += txt.size() / 4;
+	}
+	for (int i = 0; i < 4; ++i) {
+		thr[i].join();
+		mBlock += blocks[i] / 2;
+	}
 	cout << "Block = " << mBlock << endl;
-	mRange = new int[mBlock];
-	int newrange = ptn.size();
+	mRange = new int[mBlock * 2];
+	int count = 0;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < blocks[i]; j++) {
+			mRange[count++] = buffer[i][j];
+		}
+	}
+	int newrange = 0;
+	// Check the range
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1;
+		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1 + ptn.size();
 	}
 	mPercent = 100 * (double)(newrange) / (double)(txt.size());
 	cout << "New length is " << mPercent << "%" << endl;
@@ -74,7 +96,7 @@ double PreprocessParallel::get_percent() const {
 }
 
 
-void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end) {
+void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end, int& block, int* buffer) {
 	// Get hash, the length is ptn size
 	int hashT[Type]{ 0 };
 	int hashP[Type]{ 0 };
@@ -82,10 +104,8 @@ void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int t
 	get_hash(ptn, ptn.size(), hashP, 0);
 	int size = end - start - ptn.size() + 1;
 	int psize = ptn.size();
-	int block = 0;
+	block = 0;
 	int score = get_score(hashT, hashP);
-	// Buffer
-	int* buffer = new int[size / psize];
 	size += start;
 	for (int i = start; i < size; ++i) {
 		if (score >= threshold) {
@@ -117,13 +137,11 @@ void PreprocessParallel::get_range(const Data& txt, const Data& ptn, const int t
 	if (block % 2 == 1) {
 		++block;
 	}
-	mBlock += block / 2;
 	/*
 	mRange = new int[block];
 	for (int i = 0; i < block; ++i) {
 		mRange[i] = buffer[i];
 	}*/
-	delete[] buffer;
 }
 
 void PreprocessParallel::get_hash(const Data& data, int size, int* hash, int start) const {

@@ -19,8 +19,8 @@ private:
 	// The percent of reduce
 	double mPercent;
 	// Main process
-	/// txt = long sequence, ptn = short sequence, threshold = Border of OK
-	void get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end);
+	/// txt = long sequence, ptn = short sequence, threshold = Border of OK, start/end = start/end point at each thread, block/buf = result
+	void get_range(const Data& txt, const Data& ptn, const int threshold, int start, int end, int& block, int* buf);
 	// Get hash
 	void get_hash(const Data& data, int length, int* hash, int start) const;
 	// Compare hash
