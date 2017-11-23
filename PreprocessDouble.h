@@ -18,6 +18,8 @@ private:
 	int get_score(const int* hash1, const int* hash2) const;
 	// Check score
 	void check_score(const Data& db, const Data& query, int* range);
+
+	void process(const Data& db, const Data& query, const int threshold);
 };
 
 

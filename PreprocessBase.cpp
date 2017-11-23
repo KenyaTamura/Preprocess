@@ -1,7 +1,7 @@
 #include"PreprocessBase.h"
 #include"Data.h"
 #include<iostream>
-#include<thread>
+#include<algorithm>
 
 using namespace std;
 
@@ -45,4 +45,20 @@ int PreprocessBase::block() const {
 
 double PreprocessBase::get_percent() const {
 	return mPercent;
+}
+
+void PreprocessBase::get_hash(const Data& data, int size, int* hash, int start) const {
+	for (int i = 0; i < size - mAcid + 1; ++i) {
+		++hash[convert2(data, i + start)];
+	}
+}
+
+int PreprocessBase::get_score(const int* hash1, const int* hash2) const {
+	int score = 0;
+	int hash_num = static_cast<int>(pow(4, mAcid));
+	for (int i = 0; i < hash_num; ++i) {
+		score += min(hash1[i], hash2[i]);
+	}
+	if (score == 0) { return 0; }
+	else { return score + mAcid - 1; }
 }

@@ -18,10 +18,18 @@ protected:
 	int mBlock;
 	// The percent of reduce
 	double mPercent;
+	// The number of mix acid
+	int mAcid;
 	// First call
 	void start(const Data& db, const Data& query, const int threshold, const char* id);
 	// Main process
 	virtual void process(const Data& db, const Data& query, const int threshold) {};
+	// Get hash
+	void get_hash(const Data& data, int length, int* hash, int start) const;
+	// Compare hash
+	int get_score(const int* hash1, const int* hash2) const;
+	// Set acid get hash
+	virtual int convert2(const Data& data, int i) const { return -1; };
 };
 
 

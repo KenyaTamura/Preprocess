@@ -24,6 +24,10 @@ PreprocessDouble::PreprocessDouble(const Data& db, const Data& query, const int 
 	start(db, query, threshold, "Double");
 }
 
+void PreprocessDouble::process(const Data& db, const Data& query, const int threshold) {
+	get_range(db, query, threshold);
+}
+
 PreprocessDouble::~PreprocessDouble() {
 	if (mRange) {
 		delete[] mRange;
@@ -57,6 +61,10 @@ void PreprocessDouble::get_range(const Data& db, const Data& query, const int th
 	int hashP[Type]{ 0 };
 	get_hash(db, query.size(), hashT);
 	get_hash(query, query.size(), hashP);
+	for (int i = 0; i < Type; ++i) {
+		cout << hashT[i] << " ";
+	}
+	cout << endl;
 	int size = db.size() - query.size();
 	int psize = query.size();
 	int block = 0;
