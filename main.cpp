@@ -116,8 +116,7 @@ void mode_select() {
 int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
-	PreprocessParallel{ *db, *q, threshold };
-//	PreprocessSingle{ *db, *q, threshold };
+	PreprocessSingle{ *db, *q, threshold };
 	cout << t.get_millsec() << endl;
 	/*
 	mode_select();

@@ -3,6 +3,8 @@
 
 #include<algorithm>
 #include<iostream>
+#include<thread>
+#include<vector>
 
 #include"Writer.h"
 
@@ -17,9 +19,11 @@ namespace {
 		else if (acid == 'T') return 3;
 		else return 0;
 	};
+	int TNum = 8;
 }
 
-PreprocessSingle::PreprocessSingle(const Data& db, const Data& query, const int threshold) {
+PreprocessSingle::PreprocessSingle(const Data& db, const Data& query, const int threshold, const int thread_num) {
+	TNum = thread_num;
 	start(db, query, threshold, "Single");
 }
 
@@ -30,63 +34,88 @@ PreprocessSingle::~PreprocessSingle() {
 }
 
 void PreprocessSingle::process(const Data& db, const Data& query, const int threshold) {
-	get_range(db, query, threshold);
+	cout << "Thread number is " << TNum << endl;
+	vector<thread> thr(TNum);
+	vector<int> blocks(TNum);
+	vector<int*> buffer(TNum);
+	int start = 0;
+	for (int i = 0; i < TNum; ++i) {
+		// buffer size = (search length) / (base length)
+		buffer[i] = new int[db.size() / TNum / query.size()];
+		int end = start + db.size() / TNum + query.size();
+		if (i == TNum - 1) {
+			end = db.size();
+		}
+		thr[i] = thread{ &PreprocessSingle::get_range, this,
+			ref(db), ref(query), threshold,
+			start, end,
+			ref(blocks[i]), ref(buffer[i])
+		};
+		start += db.size() / TNum;
+	}
+	for (int i = 0; i < TNum; ++i) {
+		thr[i].join();
+		mBlock += blocks[i] / 2;
+	}
+	mRange = new int[mBlock * 2];
+	int count = 0;
+	for (int i = 0; i < TNum; ++i) {
+		for (int j = 0; j < blocks[i]; j++) {
+			mRange[count++] = buffer[i][j];
+		}
+		delete[] buffer[i];
+	}
 }
 
-void PreprocessSingle::get_range(const Data& db, const Data& query, const int threshold) {
+void PreprocessSingle::get_range(const Data& db, const Data& query, const int threshold, int start, int end, int& block, int* buffer) {
 	// Get hash, the length is query size
-	// Buffer
-	int* buffer = new int[db.size() / query.size()];
-	// Get hash, the length is query size
-	int hashT[Type]{ 0 };
-	int hashP[Type]{ 0 };
-	get_hash(db, query.size(), hashT);
-	get_hash(query, query.size(), hashP);
-	int size = db.size() - query.size();
-	int psize = query.size();
-	int block = 0;
-	int score = get_score(hashT, hashP);
-	for (int i = 0; i < size; ++i) {
+	int hashD[Type]{ 0 };
+	int hashQ[Type]{ 0 };
+	get_hash(db, query.size(), hashD, start);
+	get_hash(query, query.size(), hashQ, 0);
+	// applied size
+	int size = end - query.size();
+	int qsize = query.size();
+	block = 0;
+	int score = get_score(hashD, hashQ);
+	for (int i = start; i < size; ++i) {
 		if (score >= threshold) {
+			// if block start
 			if (block % 2 == 0) {
-				buffer[block++] = i;
-				buffer[block] = i + 1;
+				buffer[block++] = i;	// start point
+				buffer[block] = i + 1;	// end point(provisional)
 			}
+			// if block already started
 			else {
 				buffer[block] = i;
 			}
 		}
 		else {
-			if (block % 2 != 0 && i - buffer[block] > psize) {
+			// if delete interval over query size 
+			if (block % 2 == 1 && i - buffer[block] > qsize) {
 				++block;
 			}
 		}
 		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
 		int dec = convert(db[i]);
-		int inc = convert(db[i + psize]);
-		if (hashT[dec] <= hashP[dec]) {
+		int inc = convert(db[i + qsize]);
+		if (hashD[dec] <= hashQ[dec]) {
 			--score;
 		}
-		--hashT[dec];
-		if (hashT[inc] < hashP[inc]) {
+		--hashD[dec];
+		if (hashD[inc] < hashQ[inc]) {
 			++score;
 		}
-		++hashT[inc];
+		++hashD[inc];
 	}
 	if (block % 2 == 1) {
 		++block;
 	}
-	mBlock = block / 2;
-	mRange = new int[block];
-	for (int i = 0; i < block; ++i) {
-		mRange[i] = buffer[i];
-	}
-	delete[] buffer;
 }
 
-void PreprocessSingle::get_hash(const Data& data, int size, int* hash) const {
+void PreprocessSingle::get_hash(const Data& data, int size, int* hash, int start) const {
 	for (int i = 0; i < size; ++i) {
-		++hash[convert(data[i])];
+		++hash[convert(data[i + start])];
 	}
 }
 
