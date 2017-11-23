@@ -3,10 +3,10 @@
 
 #include<algorithm>
 #include<iostream>
+#include<thread>
+#include<vector>
 
 #include"Writer.h"
-
-#include<thread>
 
 using namespace std;
 
@@ -19,9 +19,11 @@ namespace {
 		else if (acid == 'T') return 3;
 		else return 0;
 	};
+	int Num = 8;
 }
 
-PreprocessParallel::PreprocessParallel(const Data& db, const Data& query, const int threshold){
+PreprocessParallel::PreprocessParallel(const Data& db, const Data& query, const int threshold, const int thread_num){
+	Num = thread_num;
 	start(db, query, threshold, "Parallel");
 }
 
@@ -32,13 +34,16 @@ PreprocessParallel::~PreprocessParallel() {
 }
 
 void PreprocessParallel::process(const Data& db, const Data& query, const int threshold) {
-	thread thr[4];
-	int blocks[4];
-	int buffer[4][10000];
+	cout << "Thread number is " << Num << endl;
+	vector<thread> thr(Num);
+	vector<int> blocks(Num);
+	vector<int*> buffer(Num);
 	int start = 0;
-	for (int i = 0; i < 4; ++i) {
-		int end = start + db.size() / 4 + query.size();
-		if (i == 3) {
+	for (int i = 0; i < Num; ++i) {
+		// buffer size = (search length) / (base length)
+		buffer[i] = new int[db.size() / Num / query.size()];
+		int end = start + db.size() / Num + query.size();
+		if (i == Num - 1) {
 			end = db.size();
 		}
 		thr[i] = thread{ &PreprocessParallel::get_range, this,
@@ -46,67 +51,66 @@ void PreprocessParallel::process(const Data& db, const Data& query, const int th
 			start, end,
 			ref(blocks[i]), ref(buffer[i])
 		};
-		start += db.size() / 4;
+		start += db.size() / Num;
 	}
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < Num; ++i) {
 		thr[i].join();
 		mBlock += blocks[i] / 2;
 	}
 	mRange = new int[mBlock * 2];
 	int count = 0;
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < Num; ++i) {
 		for (int j = 0; j < blocks[i]; j++) {
 			mRange[count++] = buffer[i][j];
 		}
+		delete[] buffer[i];
 	}
 }
 
 void PreprocessParallel::get_range(const Data& db, const Data& query, const int threshold, int start, int end, int& block, int* buffer) {
 	// Get hash, the length is query size
-	int hashT[Type]{ 0 };
-	int hashP[Type]{ 0 };
-	get_hash(db, query.size(), hashT, start);
-	get_hash(query, query.size(), hashP, 0);
-	int size = end - start - query.size() + 1;
-	int psize = query.size();
+	int hashD[Type]{ 0 };
+	int hashQ[Type]{ 0 };
+	get_hash(db, query.size(), hashD, start);
+	get_hash(query, query.size(), hashQ, 0);
+	// applied size
+	int size = end - query.size();
+	int qsize = query.size();
 	block = 0;
-	int score = get_score(hashT, hashP);
-	size += start;
+	int score = get_score(hashD, hashQ);
 	for (int i = start; i < size; ++i) {
 		if (score >= threshold) {
+			// if block start
 			if (block % 2 == 0) {
-				buffer[block++] = i;
-				buffer[block] = i + 1;
+				buffer[block++] = i;	// start point
+				buffer[block] = i + 1;	// end point(provisional)
 			}
+			// if block already started
 			else {
 				buffer[block] = i;
 			}
 		}
 		else {
-			if (block % 2 != 0 && i - buffer[block] > psize) {
+			// if delete interval over query size 
+			if (block % 2 == 1 && i - buffer[block] > qsize) {
 				++block;
 			}
 		}
 		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
 		int dec = convert(db[i]);
-		int inc = convert(db[i + psize]);
-		if (hashT[dec] <= hashP[dec]) {
+		int inc = convert(db[i + qsize]);
+		if (hashD[dec] <= hashQ[dec]) {
 			--score;
 		}
-		--hashT[dec];
-		if (hashT[inc] < hashP[inc]) {
+		--hashD[dec];
+		if (hashD[inc] < hashQ[inc]) {
 			++score;
 		}
-		++hashT[inc];
+		++hashD[inc];
 	}
 	if (block % 2 == 1) {
 		++block;
 	}
-	/*
-	mRange = new int[block];
-	for (int i = 0; i < block; ++i) {
-		mRange[i] = buffer[i];
-	}*/
 }
 
 void PreprocessParallel::get_hash(const Data& data, int size, int* hash, int start) const {

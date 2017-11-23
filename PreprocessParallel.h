@@ -7,7 +7,7 @@ class Data;
 
 class PreprocessParallel : public PreprocessBase {
 public:
-	PreprocessParallel(const Data& db, const Data& query, const int threshold);
+	PreprocessParallel(const Data& db, const Data& query, const int threshold, const int thread_num = 8);
 	~PreprocessParallel();
 private:
 	// Main process
