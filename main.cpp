@@ -7,6 +7,7 @@
 #include"PreprocessDouble.h"
 #include"PreprocessTriple.h"
 #include"PreprocessQuad.h"
+#include"PreprocessMerge.h"
 #include"PreprocessBase.h"
 #include"SimpleSW.h"
 #include"PreprocessSW.h"
@@ -23,7 +24,7 @@ namespace {
 	int threshold = 0;
 	int thread = 8;
 	string ofname;
-	string type = "quad";
+	string type = "merge";
 	bool cmp_flag = false;
 	bool sw_flag = false;
 	bool percent_flag = false;
@@ -103,8 +104,11 @@ void mode_select() {
 			else if (type_check("triple")) {
 				pre = new PreprocessTriple(*db, *q, threshold, thread);
 			}
-			else {
+			else if (type_check("quad")){
 				pre = new PreprocessQuad(*db, *q, threshold, thread);
+			}
+			else {
+				PreprocessMerge(*db, *q, threshold, thread, pre);
 			}
 			if (sw_flag) {
 				PreprocessSW(*db, *q, *pre, threshold);
