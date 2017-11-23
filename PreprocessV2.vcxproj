@@ -143,7 +143,6 @@
     <ClCompile Include="FileConverter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PreprocessDouble.cpp" />
-    <ClCompile Include="PreprocessParallel.cpp" />
     <ClCompile Include="PreprocessSingle.cpp" />
     <ClCompile Include="PreprocessBase.cpp" />
     <ClCompile Include="PreprocessQuad.cpp" />
@@ -158,7 +157,6 @@
     <ClInclude Include="Data.h" />
     <ClInclude Include="FileConverter.h" />
     <ClInclude Include="PreprocessDouble.h" />
-    <ClInclude Include="PreprocessParallel.h" />
     <ClInclude Include="PreprocessSingle.h" />
     <ClInclude Include="PreprocessBase.h" />
     <ClInclude Include="PreprocessQuad.h" />

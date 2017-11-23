@@ -116,9 +116,6 @@ void mode_select() {
 int main(int argc, char* argv[]) {
 	arg_branch(argc, argv);
 	Timer t;
-	PreprocessSingle{ *db, *q, threshold };
-	cout << t.get_millsec() << endl;
-	/*
 	mode_select();
 	cout << t.get_millsec() << endl;
 	if (!ofname.empty()) {
@@ -129,7 +126,7 @@ int main(int argc, char* argv[]) {
 		else {
 			w.writing(ofname.c_str(), t.get_millsec());
 		}
-	}*/
+	}
 	if (db) {
 		delete db;
 	}

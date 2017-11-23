@@ -19,11 +19,10 @@ namespace {
 		else if (acid == 'T') return 3;
 		else return 0;
 	};
-	int TNum = 8;
 }
 
 PreprocessSingle::PreprocessSingle(const Data& db, const Data& query, const int threshold, const int thread_num) {
-	TNum = thread_num;
+	mTNum = thread_num;
 	start(db, query, threshold, "Single");
 }
 
@@ -34,16 +33,16 @@ PreprocessSingle::~PreprocessSingle() {
 }
 
 void PreprocessSingle::process(const Data& db, const Data& query, const int threshold) {
-	cout << "Thread number is " << TNum << endl;
-	vector<thread> thr(TNum);
-	vector<int> blocks(TNum);
-	vector<int*> buffer(TNum);
+	cout << "Thread number is " << mTNum << endl;
+	vector<thread> thr(mTNum);
+	vector<int> blocks(mTNum);
+	vector<int*> buffer(mTNum);
 	int start = 0;
-	for (int i = 0; i < TNum; ++i) {
+	for (int i = 0; i < mTNum; ++i) {
 		// buffer size = (search length) / (base length)
-		buffer[i] = new int[db.size() / TNum / query.size()];
-		int end = start + db.size() / TNum + query.size();
-		if (i == TNum - 1) {
+		buffer[i] = new int[db.size() / mTNum / query.size()];
+		int end = start + db.size() / mTNum + query.size();
+		if (i == mTNum - 1) {
 			end = db.size();
 		}
 		thr[i] = thread{ &PreprocessSingle::get_range, this,
@@ -51,15 +50,15 @@ void PreprocessSingle::process(const Data& db, const Data& query, const int thre
 			start, end,
 			ref(blocks[i]), ref(buffer[i])
 		};
-		start += db.size() / TNum;
+		start += db.size() / mTNum;
 	}
-	for (int i = 0; i < TNum; ++i) {
+	for (int i = 0; i < mTNum; ++i) {
 		thr[i].join();
 		mBlock += blocks[i] / 2;
 	}
 	mRange = new int[mBlock * 2];
 	int count = 0;
-	for (int i = 0; i < TNum; ++i) {
+	for (int i = 0; i < mTNum; ++i) {
 		for (int j = 0; j < blocks[i]; j++) {
 			mRange[count++] = buffer[i][j];
 		}

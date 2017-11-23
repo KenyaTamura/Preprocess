@@ -3,14 +3,16 @@
 
 #include<iostream>
 #include<algorithm>
+#include<thread>
+#include<vector>
 
 #include"Writer.h"
 
 using namespace std;
 
 namespace {
-	constexpr int Double = 1;
 	constexpr int Type = 16;
+	constexpr int Double = 1;
 	auto convert = [](char acid) {
 		if (acid == 'A') return 0;
 		else if (acid == 'C') return 1;
@@ -20,7 +22,8 @@ namespace {
 	};
 }
 
-PreprocessDouble::PreprocessDouble(const Data& db, const Data& query, const int threshold) {
+PreprocessDouble::PreprocessDouble(const Data& db, const Data& query, const int threshold, const int thread_num) {
+	mTNum = thread_num;
 	start(db, query, threshold, "Double");
 }
 
@@ -30,74 +33,91 @@ PreprocessDouble::~PreprocessDouble() {
 	}
 }
 
-void PreprocessDouble::check_score(const Data& db, const Data& query, int* range) {
-	// Get hash, the length is query size
-	int hashT[Type]{ 0 };
-	int hashP[Type]{ 0 };
-	get_hash(db, query.size(), hashT);
-	get_hash(query, query.size(), hashP);
-	int size = db.size() - query.size();
-	int psize = query.size();
-	auto sum = [&](int i) {
-		return (convert(db[i]) << 2) + convert(db[i + 1]);
-	};
-	for (int i = 0; i < size; ++i) {
-		range[i] = get_score(hashT, hashP);
-		// Minus i and plus i + query.size()
-		--hashT[sum(i)];
-		++hashT[sum(i + psize - Double)];
+void PreprocessDouble::process(const Data& db, const Data& query, const int threshold) {
+	cout << "Thread number is " << mTNum << endl;
+	vector<thread> thr(mTNum);
+	vector<int> blocks(mTNum);
+	vector<int*> buffer(mTNum);
+	int start = 0;
+	for (int i = 0; i < mTNum; ++i) {
+		// buffer size = (search length) / (base length)
+		buffer[i] = new int[db.size() / mTNum / query.size()];
+		int end = start + db.size() / mTNum + query.size();
+		if (i == mTNum - 1) {
+			end = db.size();
+		}
+		thr[i] = thread{ &PreprocessDouble::get_range, this,
+			ref(db), ref(query), threshold,
+			start, end,
+			ref(blocks[i]), ref(buffer[i])
+		};
+		start += db.size() / mTNum;
+	}
+	for (int i = 0; i < mTNum; ++i) {
+		thr[i].join();
+		mBlock += blocks[i] / 2;
+	}
+	mRange = new int[mBlock * 2];
+	int count = 0;
+	for (int i = 0; i < mTNum; ++i) {
+		for (int j = 0; j < blocks[i]; j++) {
+			mRange[count++] = buffer[i][j];
+		}
+		delete[] buffer[i];
 	}
 }
 
-void PreprocessDouble::get_range(const Data& db, const Data& query, const int threshold) {
-	// Buffer
-	int* buffer = new int[db.size() / query.size()];
+void PreprocessDouble::get_range(const Data& db, const Data& query, const int threshold, int start, int end, int& block, int* buffer) {
 	// Get hash, the length is query size
-	int hashT[Type]{ 0 };
-	int hashP[Type]{ 0 };
-	get_hash(db, query.size(), hashT);
-	get_hash(query, query.size(), hashP);
-	int size = db.size() - query.size();
-	int psize = query.size();
-	int block = 0;
-	int score = get_score(hashT, hashP);
-	for (int i = 0; i < size; ++i) {
+	int hashD[Type]{ 0 };
+	int hashQ[Type]{ 0 };
+	get_hash(db, query.size(), hashD, start);
+	get_hash(query, query.size(), hashQ, 0);
+	// applied size
+	int size = end - query.size();
+	int qsize = query.size();
+	block = 0;
+	int score = get_score(hashD, hashQ);
+	for (int i = start; i < size; ++i) {
 		if (score >= threshold) {
+			// if block start
 			if (block % 2 == 0) {
-				buffer[block++] = i;
-				buffer[block] = i + 1;
+				buffer[block++] = i;	// start point
+				buffer[block] = i + 1;	// end point(provisional)
 			}
+			// if block already started
 			else {
 				buffer[block] = i;
 			}
 		}
 		else {
-			if (block % 2 != 0 && i - buffer[block] > psize) {
+			// if delete interval over query size 
+			if (block % 2 == 1 && i - buffer[block] > qsize) {
 				++block;
 			}
 		}
 		// Minus hash i~i+1 and plus hash i + query.size()-1 ~ i+query.size()
 		int dec = (convert(db[i]) << 2) + convert(db[i + 1]);
-		int offset = i + psize;
+		int offset = i + qsize;
 		int inc = (convert(db[offset - 1]) << 2) + convert(db[offset]);
-		if (hashT[dec] <= hashP[dec]) {
+		if (hashD[dec] <= hashQ[dec]) {
 			--score;
 		}
-		--hashT[dec];
-		if (hashT[inc] < hashP[inc]) {
+		--hashD[dec];
+		if (hashD[inc] < hashQ[inc]) {
 			++score;
 		}
-		++hashT[inc];
+		++hashD[inc];
 	}
 	if (block % 2 == 1) {
 		++block;
 	}
-	mBlock = block / 2;
-	mRange = new int[block];
-	for (int i = 0; i < block; ++i) {
-		mRange[i] = buffer[i];
+}
+
+void PreprocessDouble::get_hash(const Data& data, int size, int* hash, int start) const {
+	for (int i = 0; i < size - Double; ++i) {
+		++hash[(convert(data[i + start]) << 2) + convert(data[i + start + 1])];
 	}
-	delete[] buffer;
 }
 
 int PreprocessDouble::get_score(const int* hash1, const int* hash2) const {
@@ -109,11 +129,3 @@ int PreprocessDouble::get_score(const int* hash1, const int* hash2) const {
 	else { return score + Double; }
 }
 
-void PreprocessDouble::get_hash(const Data& data, int size, int* hash) const {
-	for (int i = 0; i < size - Double; ++i) {
-		++hash[(convert(data[i]) << 2) + convert(data[i + 1])];
-	}
-	/*for (int i = 0; i < Type; ++i) {
-	cout << static_cast<int>(hash[i]) << endl;
-	}*/
-}

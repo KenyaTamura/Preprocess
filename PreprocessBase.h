@@ -5,7 +5,7 @@ class Data;
 
 class PreprocessBase{
 public:
-	PreprocessBase() : mRange{ nullptr }, mBlock{ 0 } {};
+	PreprocessBase() : mRange{ nullptr }, mBlock{ 0 }, mTNum{ 0 } {};
 	virtual ~PreprocessBase() {};
 	int get(int i) const;
 	int* getAll() const;
@@ -18,6 +18,8 @@ protected:
 	int mBlock;
 	// The percent of reduce
 	double mPercent;
+	// The number of threads
+	int mTNum;
 	// First call
 	void start(const Data& db, const Data& query, const int threshold, const char* id);
 	// Main process
