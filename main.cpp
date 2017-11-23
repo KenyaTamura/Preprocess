@@ -15,14 +15,13 @@
 #include"Timer.h"
 #include"Writer.h"
 
-#include"PreprocessParallel.h"
-
 using namespace std;
 
 namespace {
 	Data* db = nullptr;
 	Data* q = nullptr;
 	int threshold = 0;
+	int thread = 8;
 	string ofname;
 	string type = "quad";
 	bool cmp_flag = false;
@@ -62,6 +61,9 @@ void arg_branch(int argc, char* argv[]) {
 		if (cmp(i, "-sw")) {
 			sw_flag = true;
 		}
+		if (cmp(i, "-thread")) {
+			if (++i < argc && atoi(argv[i]) > 0) { thread = atoi(argv[i]); }
+		}
 	}
 }
 
@@ -71,16 +73,16 @@ void mode_select() {
 		// Compare execution time at preprocess
 		if (cmp_flag) {
 			Timer t;
-			PreprocessSingle(*db, *q, threshold);
+			PreprocessSingle(*db, *q, threshold, thread);
 			cout << t.get_millsec() << endl;
 			t.start();
-			PreprocessDouble(*db, *q, threshold);
+			PreprocessDouble(*db, *q, threshold, thread);
 			cout << t.get_millsec() << endl;
 			t.start();
-			PreprocessTriple(*db, *q, threshold);
+			PreprocessTriple(*db, *q, threshold, thread);
 			cout << t.get_millsec() << endl;
 			t.start();
-			PreprocessQuad(*db, *q, threshold);
+			PreprocessQuad(*db, *q, threshold, thread);
 			cout << t.get_millsec() << endl;
 	//		t.start();
 	//		SimpleSW(*db, *q, threshold);
@@ -93,16 +95,16 @@ void mode_select() {
 				return;
 			}		
 			if (type_check("single")) {
-				pre = new PreprocessSingle(*db, *q, threshold);
+				pre = new PreprocessSingle(*db, *q, threshold, thread);
 			}
 			else if (type_check("double")) {
-				pre = new PreprocessDouble(*db, *q, threshold);
+				pre = new PreprocessDouble(*db, *q, threshold, thread);
 			}
 			else if (type_check("triple")) {
-				pre = new PreprocessTriple(*db, *q, threshold);
+				pre = new PreprocessTriple(*db, *q, threshold, thread);
 			}
 			else {
-				pre = new PreprocessQuad(*db, *q, threshold);
+				pre = new PreprocessQuad(*db, *q, threshold, thread);
 			}
 			if (sw_flag) {
 				PreprocessSW(*db, *q, *pre, threshold);
