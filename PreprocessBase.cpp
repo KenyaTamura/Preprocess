@@ -16,9 +16,12 @@ void PreprocessBase::start(const Data& db, const Data& query, const int threshol
 	cout << "Block = " << mBlock << endl;
 	int newrange = 0;
 	for (int i = 0; i < mBlock; ++i) {
-		newrange += mRange[i * 2 + 1] - mRange[i * 2] + 1 + query.size();
+		int size = mRange[i * 2 + 1] - mRange[i * 2] + 1 + query.size();
+		newrange += size;
+		if (mSize < size) { mSize = size; }
 	}
 	mPercent = 100 * (double)(newrange) / (double)(db.size());
+	cout << "Max size is " << mSize << endl;
 	cout << "New length is " << mPercent << "%" << endl;
 	cout << "Preprocess" << id << " end" << endl;
 
@@ -45,4 +48,8 @@ int PreprocessBase::block() const {
 
 double PreprocessBase::get_percent() const {
 	return mPercent;
+}
+
+int PreprocessBase::get_size() const {
+	return mSize;
 }

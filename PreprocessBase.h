@@ -5,12 +5,13 @@ class Data;
 
 class PreprocessBase{
 public:
-	PreprocessBase() : mRange{ nullptr }, mBlock{ 0 }, mTNum{ 0 } {};
+	PreprocessBase() : mRange{ nullptr }, mBlock{ 0 }, mTNum{ 0 }, mSize{ 0 } {};
 	virtual ~PreprocessBase() {};
 	int get(int i) const;
 	int* getAll() const;
 	int block() const;
 	double get_percent() const;
+	int get_size() const;
 protected:
 	// 0,13,25,50 = 0~13 and 25~50
 	int* mRange;
@@ -18,6 +19,8 @@ protected:
 	int mBlock;
 	// The percent of reduce
 	double mPercent;
+	// The max size of blocks
+	int mSize;
 	// The number of threads
 	int mTNum;
 	// First call

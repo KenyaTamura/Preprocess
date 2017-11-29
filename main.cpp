@@ -28,6 +28,7 @@ namespace {
 	bool cmp_flag = false;
 	bool sw_flag = false;
 	bool percent_flag = false;
+	bool size_flag = false;
 	PreprocessBase* pre = nullptr;
 }
 
@@ -58,6 +59,9 @@ void arg_branch(int argc, char* argv[]) {
 		}
 		if (cmp(i, "-percent")) {
 			if (++i < argc) { ofname = argv[i]; percent_flag = true; }
+		}
+		if (cmp(i, "-size")) {
+			if (++i < argc) { ofname = argv[i]; size_flag = true; }
 		}
 		if (cmp(i, "-sw")) {
 			sw_flag = true;
@@ -128,6 +132,9 @@ int main(int argc, char* argv[]) {
 		Writer w;
 		if (percent_flag) {
 			w.writing(ofname.c_str(), pre->get_percent());
+		}
+		else if (size_flag) {
+			w.writing(ofname.c_str(), pre->get_size());
 		}
 		else {
 			w.writing(ofname.c_str(), t.get_millsec());
