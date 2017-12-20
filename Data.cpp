@@ -17,10 +17,11 @@ Data::Data(const char* fname) : mData{ nullptr } {
 	ifs.seekg(0, ifstream::end);
 	mSize = static_cast<int>(ifs.tellg());
 	ifs.seekg(0, ifstream::beg);
-	mData = new char[mSize];
+	mData = new char[mSize + 1];
 	ifs.read(mData, mSize);
 	if (mData[mSize - 1] == '\0' ||
 		mData[mSize - 1] == '\n') { --mSize; }
+	else { mData[mSize] = '\0'; }
 }
 
 Data::~Data() {

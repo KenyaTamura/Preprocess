@@ -51,6 +51,7 @@ void SWBase::search_max() {
 }
 
 void SWBase::traceback(const Data& db, const Data& query) const {
+	if (mMaxScore == 0) { return; }
 	int len = query.size() + query.size() / 2;
 	if (len > db.size()) { len = db.size(); }
 	if (len > mMaxPos) { len = 0; }
@@ -75,6 +76,8 @@ void SWBase::traceback(const Data& db, const Data& query) const {
 	int ext = cost.Extend;
 	int beg = cost.Begin;
 	// SW
+	int dir_point = psize * len - 1;
+	int dir_t = 0;
 	for (int t = mMaxPos - len; t <= mMaxPos; ++t) {
 		int EScore = 0;
 		int score = 0;
@@ -104,34 +107,38 @@ void SWBase::traceback(const Data& db, const Data& query) const {
 			EScore = std::max({ EBeg, EExt, 0 });
 			prevScore = std::max({ FScore[p],EScore,score });
 			// Set direction
-			int dir_point = p*len + t;
+			int d = p*len + dir_t;
 			if (prevScore == 0) {
-				dir[dir_point] = Direction::ZERO;
+				dir[d] = Direction::ZERO;
 			}
 			else if (FScore[p] > EScore && FScore[p] > score) {
-				dir[dir_point] = Direction::LEFT;
+				dir[d] = Direction::LEFT;
 			}
 			else if (EScore > score) {
-				dir[dir_point] = Direction::UP;
+				dir[d] = Direction::UP;
 			}
 			else {
-				dir[dir_point] = Direction::DIA;
+				dir[d] = Direction::DIA;
+			}
+			if (prevScore == mMaxScore) {
+				dir_point = d;
 			}
 		}
+		++dir_t;
 	}
 	// Traceback
-	int t = mMaxPos, dir_point = psize * len - 1;
+	int t = mMaxPos;
 	std::string s;
-	s += db[t];
 	while (dir[dir_point] != Direction::ZERO) {
 		switch (dir[dir_point]) {
 		case Direction::DIA:
 			dir_point -= (len + 1);
-			s += db[t];
+			s += db[t--];
 			break;
 		case Direction::LEFT:
 			dir_point -= 1;
 			s += '/';
+			t--;
 			break;
 		case Direction::UP:
 			dir_point -= len;
@@ -142,6 +149,7 @@ void SWBase::traceback(const Data& db, const Data& query) const {
 		}
 		if (dir_point < 0) { break; }
 	}
-	s.reserve();
-	std::cout << "Result array\n"<< s << std::endl;
+	std::reverse(std::begin(s), std::end(s));
+	std::cout << "Orignal array\n" << query.data() << std::endl
+		<< "Result array\n"<< s << std::endl;
 }
