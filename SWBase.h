@@ -1,6 +1,8 @@
 #ifndef SWBASE_H
 #define SWBASE_H
 
+class Data;
+
 class SWBase {
 public:
 	virtual ~SWBase() {};
@@ -10,6 +12,7 @@ public:
 protected:
 	SWBase(int threshold);
 	SWBase() {};
+	void traceback(const Data& db, const Data& query) const;
 	int* mScore;
 	int mSize;
 	int mThreshold;
