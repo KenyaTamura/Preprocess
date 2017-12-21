@@ -65,12 +65,6 @@ void SWBase::traceback(const Data& db, const Data& query) const {
 	int psize = query.size();
 	int* FScore = new int[psize] {0};
 	int* MainScore = new int[psize + 1]{ 0 };
-	int EScore = 0;
-	int score = 0;
-	int FBeg = 0;
-	int FExt = 0;
-	int EBeg = 0;
-	int EExt = 0;
 	int match = cost.Match;
 	int miss = cost.Miss;
 	int ext = cost.Extend;
